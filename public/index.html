@@ -1,0 +1,2371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Neuro Detect - Tremor Monitoring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap"/>
+<style>
+/* ══════════════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════════════ */
+:root {
+  --bg:          #080c10;
+  --surface:     #0d1117;
+  --surface2:    #111820;
+  --border:      #1e2d3d;
+  --border2:     #243040;
+  --text:        #c9d8e8;
+  --text-muted:  #5a7a96;
+  --accent:      #00d4ff;
+  --accent-dim:  rgba(0,212,255,0.12);
+  --accent-glow: rgba(0,212,255,0.35);
+  --green:       #00e676;
+  --green-dim:   rgba(0,230,118,0.12);
+  --yellow:      #ffca28;
+  --yellow-dim:  rgba(255,202,40,0.12);
+  --orange:      #ff7043;
+  --orange-dim:  rgba(255,112,67,0.12);
+  --red:         #ff1744;
+  --red-dim:     rgba(255,23,68,0.12);
+  --mono:        'Space Mono', monospace;
+  --sans:        'Syne', sans-serif;
+  --radius:      10px;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Animated grid background ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ══════════════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════════════ */
+.shell {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+
+/* ── Header ── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo-icon {
+  width: 44px; height: 44px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  box-shadow: 0 0 16px var(--accent-glow);
+  animation: pulse-ring 3s infinite;
+}
+
+@keyframes pulse-ring {
+  0%,100% { box-shadow: 0 0 8px var(--accent-glow); }
+  50%      { box-shadow: 0 0 24px var(--accent-glow), 0 0 48px rgba(0,212,255,0.15); }
+}
+
+.logo-icon svg { width:22px; height:22px; stroke: var(--accent); fill:none; }
+
+.logo-text h1 {
+  font-family: var(--sans);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
+}
+.logo-text span {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ── Connection badge ── */
+.conn-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  transition: all 0.4s;
+}
+.conn-badge.online  { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+.conn-badge.offline { border-color: var(--red);   color: var(--red);   background: var(--red-dim); }
+
+.conn-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.conn-badge.online .conn-dot { animation: blink 1.2s infinite; }
+@keyframes blink {
+  0%,100% { opacity:1; } 50% { opacity:0.3; }
+}
+
+/* ── Uptime ── */
+.uptime-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 40px;
+}
+
+/* ── IP Config ── */
+.ip-form {
+  display: flex;
+  gap: 8px;
+}
+.ip-form input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 6px 10px;
+  width: 140px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.ip-form input:focus { border-color: var(--accent); }
+.btn {
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn:hover { background: var(--accent); color: #000; }
+
+/* ══════════════════════════════════════════════
+   TREMOR STATUS BANNER
+══════════════════════════════════════════════ */
+.status-banner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 28px 32px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-bottom: 24px;
+  transition: all 0.5s;
+  position: relative;
+  overflow: hidden;
+}
+
+.status-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 60%, rgba(0,212,255,0.04));
+  transition: background 0.5s;
+}
+
+.status-banner.tremor-active {
+  border-color: var(--red);
+  background: var(--surface);
+  animation: tremor-flash 0.8s infinite alternate;
+}
+@keyframes tremor-flash {
+  from { box-shadow: inset 0 0 0px var(--red-dim); }
+  to   { box-shadow: inset 0 0 40px var(--red-dim); }
+}
+
+.status-indicator {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  border: 3px solid var(--green);
+  background: var(--green-dim);
+  flex-shrink: 0;
+  transition: all 0.4s;
+  font-size: 32px;
+}
+.status-indicator.active {
+  border-color: var(--red);
+  background: var(--red-dim);
+  animation: shake 0.3s infinite;
+}
+@keyframes shake {
+  0%,100% { transform: translate(0,0) rotate(0deg); }
+  25%      { transform: translate(-2px,1px) rotate(-1deg); }
+  75%      { transform: translate(2px,-1px) rotate(1deg); }
+}
+
+.status-text h2 {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+  color: var(--green);
+  transition: color 0.4s;
+}
+.status-text h2.active { color: var(--red); }
+.status-text p {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.intensity-pill {
+  margin-left: auto;
+  padding: 8px 20px;
+  border-radius: 40px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border: 2px solid var(--green);
+  color: var(--green);
+  background: var(--green-dim);
+  transition: all 0.4s;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════
+   CARDS GRID
+══════════════════════════════════════════════ */
+.grid-main {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  transition: border-color 0.3s;
+}
+.card:hover { border-color: var(--border2); }
+
+.card-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-label::before {
+  content: '';
+  width: 4px; height: 4px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.card-value {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.card-unit {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+/* Axis readout rows */
+.axis-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+.axis-row:last-child { border-bottom: none; }
+
+.axis-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  width: 20px;
+}
+.axis-bar-wrap {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.axis-bar {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.15s ease-out;
+  transform-origin: left;
+}
+.axis-val {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text);
+  width: 60px;
+  text-align: right;
+}
+
+/* ══════════════════════════════════════════════
+   INTENSITY METER
+══════════════════════════════════════════════ */
+.meter-wrap {
+  margin-top: 10px;
+}
+.meter-track {
+  height: 12px;
+  background: var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.meter-fill {
+  height: 100%;
+  border-radius: 6px;
+  width: 0%;
+  transition: width 0.2s ease-out, background 0.3s;
+  background: linear-gradient(90deg, var(--green), var(--yellow), var(--orange), var(--red));
+  background-size: 500px 100%;
+}
+.meter-ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+.meter-ticks span {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+/* ══════════════════════════════════════════════
+   CHARTS
+══════════════════════════════════════════════ */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+@media (max-width: 780px) { .charts-row { grid-template-columns: 1fr; } }
+
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+}
+.chart-card canvas {
+  width: 100% !important;
+  display: block;
+}
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.chart-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.chart-legend {
+  display: flex;
+  gap: 12px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.legend-dot {
+  width: 8px; height: 3px;
+  border-radius: 2px;
+}
+
+/* ══════════════════════════════════════════════
+   STATS ROW
+══════════════════════════════════════════════ */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+@media (max-width: 700px) { .stats-row { grid-template-columns: repeat(2,1fr); } }
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  text-align: center;
+}
+.stat-num {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.stat-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ══════════════════════════════════════════════
+   LOG
+══════════════════════════════════════════════ */
+.log-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  margin-bottom: 24px;
+}
+.log-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+#event-log {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  max-height: 160px;
+  overflow-y: auto;
+  line-height: 1.8;
+}
+#event-log .log-entry { display: block; }
+#event-log .log-entry.tremor-on  { color: var(--red); }
+#event-log .log-entry.tremor-off { color: var(--green); }
+
+/* ══════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════ */
+footer {
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* ══════════════════════════════════════════════
+   MOBILE TWEAKS
+══════════════════════════════════════════════ */
+@media (max-width: 560px) {
+  .status-banner { flex-direction: column; align-items: flex-start; }
+  .intensity-pill { margin-left: 0; }
+  .grid-main { grid-template-columns: 1fr; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ══════════════════════════════════════════════
+   COGNITIVE TESTS SECTION
+══════════════════════════════════════════════ */
+.cog-section {
+  margin-bottom: 24px;
+}
+.cog-section-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cog-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.cog-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 780px) { .cog-grid { grid-template-columns: 1fr; } }
+
+.cog-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: border-color 0.3s;
+}
+.cog-card:hover { border-color: var(--border2); }
+
+.cog-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cog-card-title {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+.cog-card-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+.cog-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid var(--border2);
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.cog-badge.alzheimer { border-color: rgba(255,202,40,0.4); color: var(--yellow); background: var(--yellow-dim); }
+
+/* ── Memory Test UI ── */
+.mem-display {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.mem-sequence {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 14px;
+  color: var(--accent);
+  text-shadow: 0 0 20px var(--accent-glow);
+  transition: opacity 0.3s;
+}
+.mem-prompt {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.mem-input-row {
+  display: flex;
+  gap: 8px;
+}
+.mem-input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 20px;
+  letter-spacing: 8px;
+  padding: 10px 14px;
+  outline: none;
+  text-align: center;
+  transition: border-color 0.3s;
+}
+.mem-input:focus { border-color: var(--accent); }
+.mem-input::placeholder { font-size: 12px; letter-spacing: 2px; color: var(--text-muted); }
+
+.cog-btn {
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.cog-btn:hover { background: var(--accent); color: #000; }
+.cog-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.cog-btn.danger { border-color: var(--red); background: var(--red-dim); color: var(--red); }
+.cog-btn.danger:hover { background: var(--red); color: #fff; }
+.cog-btn.success { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+.cog-btn.success:hover { background: var(--green); color: #000; }
+
+.cog-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cog-stat {
+  flex: 1;
+  min-width: 70px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: center;
+}
+.cog-stat-num {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.cog-stat-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.cog-result {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  display: none;
+  border: 1px solid var(--border);
+}
+.cog-result.show { display: block; }
+.cog-result.good { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+.cog-result.warn { border-color: var(--yellow); background: var(--yellow-dim); color: var(--yellow); }
+.cog-result.bad  { border-color: var(--red); background: var(--red-dim); color: var(--red); }
+
+/* ── Reaction Test UI ── */
+.react-zone {
+  border-radius: 10px;
+  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--mono);
+  font-size: 14px;
+  text-align: center;
+  gap: 8px;
+  transition: all 0.2s;
+  border: 2px dashed var(--border);
+  background: var(--surface2);
+  position: relative;
+  overflow: hidden;
+}
+.react-zone.waiting {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  animation: pulse-wait 1.5s infinite alternate;
+}
+@keyframes pulse-wait {
+  from { box-shadow: none; }
+  to   { box-shadow: 0 0 24px var(--accent-glow); }
+}
+.react-zone.go {
+  border-color: var(--green);
+  background: var(--green-dim);
+  animation: go-flash 0.15s ease-out;
+  cursor: pointer;
+}
+@keyframes go-flash {
+  from { transform: scale(1.02); }
+  to   { transform: scale(1); }
+}
+.react-zone.early {
+  border-color: var(--red);
+  background: var(--red-dim);
+}
+.react-zone.done {
+  border-color: var(--yellow);
+  background: var(--yellow-dim);
+}
+.react-zone-icon { font-size: 36px; }
+.react-zone-text { font-size: 13px; letter-spacing: 1px; }
+.react-zone-ms { font-size: 26px; font-weight: 700; font-family: var(--mono); }
+
+.react-history {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.react-chip {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.react-chip.normal   { border-color: var(--green);  color: var(--green);  background: var(--green-dim); }
+.react-chip.mild     { border-color: #69f0ae;        color: #69f0ae;        background: rgba(105,240,174,0.10); }
+.react-chip.moderate { border-color: var(--yellow); color: var(--yellow); background: var(--yellow-dim); }
+.react-chip.severe   { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
+.react-chip.critical { border-color: var(--red);    color: var(--red);    background: var(--red-dim); }
+
+/* Category legend strip */
+.react-legend {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.react-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.react-legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+
+/* ── Alzheimer Risk Score ── */
+.risk-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.risk-gauge {
+  position: relative;
+  width: 120px;
+  height: 60px;
+  flex-shrink: 0;
+}
+.risk-gauge svg { width: 120px; height: 60px; }
+.risk-score-label {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.risk-info { flex: 1; min-width: 200px; }
+.risk-title {
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.risk-detail {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.8;
+  letter-spacing: 0.5px;
+}
+.risk-factors {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+}
+.risk-factor-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.risk-factor-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border2);
+  flex-shrink: 0;
+  transition: background 0.4s;
+}
+.risk-factor-dot.active { background: var(--yellow); box-shadow: 0 0 6px rgba(255,202,40,0.5); }
+.risk-factor-dot.concern { background: var(--red); box-shadow: 0 0 6px rgba(255,23,68,0.5); }
+
+  /* ══════════════════════════════════════════════
+   PATIENT MANAGER
+══════════════════════════════════════════════ */
+.patient-btn {
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+.patient-btn:hover { background: var(--accent); color: #000; }
+
+/* Overlay */
+#patient-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+#patient-overlay.open { display: flex; }
+
+/* Modal box */
+.patient-modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  width: 520px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  position: relative;
+}
+
+.modal-title {
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.modal-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text-muted);
+  border-radius: 6px;
+  width: 28px; height: 28px;
+  cursor: pointer;
+  font-size: 16px;
+  display: grid; place-items: center;
+  transition: all 0.2s;
+}
+.modal-close:hover { border-color: var(--red); color: var(--red); }
+
+/* Tabs */
+.modal-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+.modal-tab {
+  padding: 8px 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.2s;
+}
+.modal-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Form fields */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.field label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.field input {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.field input:focus { border-color: var(--accent); }
+
+/* Patient list */
+.patient-list { display: flex; flex-direction: column; gap: 10px; }
+
+.patient-card-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.patient-card-item:hover { border-color: var(--accent); }
+.patient-card-item.selected { border-color: var(--accent); background: var(--accent-dim); }
+
+.pci-info { flex: 1; }
+.pci-name {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+.pci-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  letter-spacing: 0.5px;
+}
+.pci-serial {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  background: var(--accent-dim);
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(0,212,255,0.2);
+}
+.pci-delete {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text-muted);
+  border-radius: 6px;
+  width: 26px; height: 26px;
+  cursor: pointer;
+  font-size: 13px;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.pci-delete:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+
+/* Active patient banner */
+#active-patient-bar {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+#active-patient-bar.show { display: flex; }
+
+.apb-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.apb-name {
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+}
+.apb-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.apb-serial {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  margin-left: auto;
+}
+.apb-session {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
+          <path d="M3 12 Q6 6 9 12 Q12 18 15 12 Q18 6 21 12"/>
+          <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <h1>Neuro Detect</h1>
+        <span>Tremor Monitoring System</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button class="patient-btn" type="button" onclick="openPatientModal()">PATIENTS</button>
+      <div id="conn-badge" class="conn-badge offline">
+        <span class="conn-dot"></span>
+        <span id="conn-text">CONNECTING</span>
+      </div>
+      <div class="uptime-tag">UPTIME <span id="uptime">00:00</span></div>
+      <div class="ip-form">
+        <input id="ip-input" type="text" placeholder="ESP32 IP"/>
+        <button class="btn" type="button" onclick="updateIP()">SET IP</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="active-patient-bar">
+    <div class="apb-label">Active Patient</div>
+    <div>
+      <div id="apb-name" class="apb-name">No patient selected</div>
+      <div id="apb-meta" class="apb-meta">Select or add a patient</div>
+    </div>
+    <div id="apb-serial" class="apb-serial">Serial: --</div>
+    <div id="apb-session" class="apb-session">Session #0</div>
+  </div>
+
+  <section id="status-banner" class="status-banner">
+    <div id="status-indicator" class="status-indicator">OK</div>
+    <div class="status-text">
+      <h2 id="status-label">NO TREMOR</h2>
+      <p id="status-sub">Monitoring active - waiting for sensor data</p>
+    </div>
+    <div id="intensity-pill" class="intensity-pill">NONE</div>
+  </section>
+
+  <section class="grid-main">
+    <div class="card">
+      <div class="card-label">Gyro Magnitude</div>
+      <div id="val-gyromag" class="card-value">0.000<span class="card-unit">rad/s</span></div>
+      <div class="meter-wrap">
+        <div class="meter-track"><div id="meter-gyro" class="meter-fill"></div></div>
+        <div class="meter-ticks"><span>0</span><span>1.25</span><span>2.5</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Motion Level</div>
+      <div id="val-motion" class="card-value">0.000<span class="card-unit">combined</span></div>
+      <div class="meter-wrap">
+        <div class="meter-track"><div id="meter-motion" class="meter-fill"></div></div>
+        <div class="meter-ticks"><span>0</span><span>1.25</span><span>2.5</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Gyroscope Axes</div>
+      <div class="axis-row"><span class="axis-label">GX</span><div class="axis-bar-wrap"><div id="bar-gx" class="axis-bar"></div></div><span id="val-gx" class="axis-val">+0.000</span></div>
+      <div class="axis-row"><span class="axis-label">GY</span><div class="axis-bar-wrap"><div id="bar-gy" class="axis-bar"></div></div><span id="val-gy" class="axis-val">+0.000</span></div>
+      <div class="axis-row"><span class="axis-label">GZ</span><div class="axis-bar-wrap"><div id="bar-gz" class="axis-bar"></div></div><span id="val-gz" class="axis-val">+0.000</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Accelerometer Axes</div>
+      <div class="axis-row"><span class="axis-label">AX</span><div class="axis-bar-wrap"><div id="bar-ax" class="axis-bar"></div></div><span id="val-ax" class="axis-val">+0.000</span></div>
+      <div class="axis-row"><span class="axis-label">AY</span><div class="axis-bar-wrap"><div id="bar-ay" class="axis-bar"></div></div><span id="val-ay" class="axis-val">+0.000</span></div>
+      <div class="axis-row"><span class="axis-label">AZ</span><div class="axis-bar-wrap"><div id="bar-az" class="axis-bar"></div></div><span id="val-az" class="axis-val">+0.000</span></div>
+    </div>
+  </section>
+
+  <section class="charts-row">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">Gyroscope Stream</div>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#00d4ff"></span>GX</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#00e676"></span>GY</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#ffca28"></span>GZ</span>
+        </div>
+      </div>
+      <canvas id="chart-gyro"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">Magnitude Trend</div>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#ff1744"></span>MAG</span>
+        </div>
+      </div>
+      <canvas id="chart-mag"></canvas>
+    </div>
+  </section>
+
+  <section class="stats-row">
+    <div class="stat-card"><div id="stat-readings" class="stat-num">--</div><div class="stat-label">Readings</div></div>
+    <div class="stat-card"><div id="stat-events" class="stat-num">--</div><div class="stat-label">Events</div></div>
+    <div class="stat-card"><div id="stat-rate" class="stat-num">--</div><div class="stat-label">Tremor Rate</div></div>
+    <div class="stat-card"><div id="stat-rssi" class="stat-num">--</div><div class="stat-label">RSSI</div></div>
+  </section>
+
+  <section id="pd-panel" class="risk-panel">
+    <div id="pd-icon" class="status-indicator">OK</div>
+    <div class="risk-info">
+      <div id="pd-title" class="risk-title">No Tremor Detected</div>
+      <div id="pd-message" class="risk-detail">No significant tremor is currently detected.</div>
+    </div>
+    <div id="pd-badge" class="intensity-pill">NO RISK</div>
+  </section>
+
+  <section class="cog-section">
+    <div class="cog-section-title">Cognitive Tests</div>
+    <div class="cog-grid">
+      <div class="cog-card">
+        <div class="cog-card-header">
+          <div>
+            <div class="cog-card-title">Memory Sequence</div>
+            <div class="cog-card-sub">Recall challenge</div>
+          </div>
+          <div class="cog-badge alzheimer">Memory</div>
+        </div>
+        <div class="mem-display">
+          <div id="mem-sequence" class="mem-sequence" style="display:none"></div>
+          <div id="mem-prompt" class="mem-prompt">Press START to begin</div>
+        </div>
+        <div class="mem-input-row">
+          <input id="mem-input" class="mem-input" type="text" placeholder="TYPE SEQUENCE" disabled/>
+          <button id="mem-submit-btn" class="cog-btn success" type="button" onclick="memSubmit()" disabled>SUBMIT</button>
+          <button id="mem-start-btn" class="cog-btn" type="button" onclick="memStart()">START</button>
+        </div>
+        <div class="cog-stats">
+          <div class="cog-stat"><div id="mem-score" class="cog-stat-num">0</div><div class="cog-stat-label">Score</div></div>
+          <div class="cog-stat"><div id="mem-level" class="cog-stat-num">1</div><div class="cog-stat-label">Level</div></div>
+          <div class="cog-stat"><div id="mem-streak" class="cog-stat-num">0</div><div class="cog-stat-label">Streak</div></div>
+          <div class="cog-stat"><div id="mem-best" class="cog-stat-num">0</div><div class="cog-stat-label">Best</div></div>
+        </div>
+        <div id="mem-result" class="cog-result"></div>
+      </div>
+
+      <div class="cog-card">
+        <div class="cog-card-header">
+          <div>
+            <div class="cog-card-title">Reaction Speed</div>
+            <div class="cog-card-sub">Response timing</div>
+          </div>
+          <div class="cog-badge">Reaction</div>
+        </div>
+        <div id="react-zone" class="react-zone" onclick="reactClick()">
+          <div class="react-zone-icon">GO</div>
+          <div id="react-text" class="react-zone-text">TAP TO START</div>
+        </div>
+        <div class="cog-stats">
+          <div class="cog-stat"><div id="react-last" class="cog-stat-num">--</div><div class="cog-stat-label">Last ms</div></div>
+          <div class="cog-stat"><div id="react-avg" class="cog-stat-num">--</div><div class="cog-stat-label">Average</div></div>
+          <div class="cog-stat"><div id="react-best" class="cog-stat-num">--</div><div class="cog-stat-label">Best</div></div>
+          <div class="cog-stat"><div id="react-tries" class="cog-stat-num">0</div><div class="cog-stat-label">Tries</div></div>
+        </div>
+        <div id="react-history" class="react-history"></div>
+        <div class="react-legend">
+          <span class="react-legend-item"><span class="react-legend-dot" style="background:#00e676"></span>Normal</span>
+          <span class="react-legend-item"><span class="react-legend-dot" style="background:#ffca28"></span>Moderate</span>
+          <span class="react-legend-item"><span class="react-legend-dot" style="background:#ff1744"></span>Critical</span>
+        </div>
+        <div id="react-result" class="cog-result"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="risk-panel">
+    <div class="risk-gauge">
+      <svg viewBox="0 0 120 60" aria-hidden="true">
+        <path d="M10 55 A50 50 0 0 1 110 55" stroke="var(--border2)" stroke-width="10" fill="none" stroke-linecap="round"/>
+        <path id="risk-arc" d="M10 55 A50 50 0 0 1 110 55" stroke="var(--accent)" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="157"/>
+      </svg>
+      <div id="risk-score-label" class="risk-score-label">0%</div>
+    </div>
+    <div class="risk-info">
+      <div class="risk-title">Alzheimer Risk Assessment</div>
+      <div id="risk-detail" class="risk-detail">Low risk profile. All indicators within normal ranges. Continue periodic monitoring.</div>
+    </div>
+    <div class="risk-factors">
+      <div class="risk-factor-row"><span id="rf-tremor" class="risk-factor-dot"></span>Tremor marker</div>
+      <div class="risk-factor-row"><span id="rf-memory" class="risk-factor-dot"></span>Memory marker</div>
+      <div class="risk-factor-row"><span id="rf-reaction" class="risk-factor-dot"></span>Reaction marker</div>
+      <div class="risk-factor-row"><span id="rf-consistency" class="risk-factor-dot"></span>Consistency marker</div>
+    </div>
+  </section>
+
+  <section class="log-card">
+    <div class="log-title">Event Log</div>
+    <div id="event-log"></div>
+  </section>
+
+  <footer>NEURO DETECT v1.0 &nbsp; ESP32 + MPU6050 &nbsp; Real-time Tremor Monitoring</footer>
+</div>
+
+<div id="patient-overlay">
+  <div class="patient-modal">
+    <button class="modal-close" type="button" onclick="closePatientModal()" aria-label="Close">x</button>
+    <div class="modal-title">Patient Manager</div>
+    <div class="modal-sub">Register and select patient records</div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" type="button" onclick="switchTab('list')">Patients</button>
+      <button class="modal-tab" type="button" onclick="switchTab('new')">New Patient</button>
+    </div>
+    <div id="tab-list">
+      <div id="patient-list-container" class="patient-list"></div>
+    </div>
+    <div id="tab-new" style="display:none">
+      <div class="field-group">
+        <div class="field"><label for="np-name">Name</label><input id="np-name" type="text"/></div>
+        <div class="field"><label for="np-age">Age</label><input id="np-age" type="number" min="1" max="120"/></div>
+        <div class="field"><label for="np-date">First Used</label><input id="np-date" type="date"/></div>
+        <div class="field"><label for="np-serial">Device Serial</label><input id="np-serial" type="text"/></div>
+      </div>
+      <div id="np-error" class="cog-result bad" style="display:none"></div>
+      <button class="cog-btn success" type="button" onclick="saveNewPatient()">SAVE PATIENT</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  CONFIG
+// ─────────────────────────────────────────────
+const WS_URL      = `ws://${location.host}`;
+const CHART_LEN   = 80;   // data points shown on chart
+
+// ─────────────────────────────────────────────
+//  CHART DATA BUFFERS
+// ─────────────────────────────────────────────
+const labels  = Array(CHART_LEN).fill('');
+const dGX = Array(CHART_LEN).fill(0);
+const dGY = Array(CHART_LEN).fill(0);
+const dGZ = Array(CHART_LEN).fill(0);
+const dMag = Array(CHART_LEN).fill(0);
+
+// ─────────────────────────────────────────────
+//  MINI CANVAS CHARTS (no external lib needed)
+// ─────────────────────────────────────────────
+class LineChart {
+  constructor(canvasId, datasets, yMin, yMax) {
+    this.canvas   = document.getElementById(canvasId);
+    this.ctx      = this.canvas.getContext('2d');
+    this.datasets = datasets;
+    this.yMin     = yMin;
+    this.yMax     = yMax;
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+  }
+
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.canvas.width  = rect.width * dpr;
+    this.canvas.height = 160 * dpr;
+    this.canvas.style.width  = rect.width + 'px';
+    this.canvas.style.height = '160px';
+    this.ctx.scale(dpr, dpr);
+    this.w = rect.width;
+    this.h = 160;
+  }
+
+  draw() {
+    const { ctx, w, h, datasets, yMin, yMax } = this;
+    ctx.clearRect(0, 0, w, h);
+
+    // Background grid
+    ctx.strokeStyle = 'rgba(30,45,61,0.8)';
+    ctx.lineWidth   = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = (i / 4) * h;
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    }
+
+    // Zero line
+    const zeroY = h - ((0 - yMin) / (yMax - yMin)) * h;
+    ctx.strokeStyle = 'rgba(90,122,150,0.4)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(0, zeroY); ctx.lineTo(w, zeroY); ctx.stroke();
+    ctx.setLineDash([]);
+
+    const step = w / (CHART_LEN - 1);
+    datasets.forEach(({ data, color, fill }) => {
+      ctx.beginPath();
+      data.forEach((v, i) => {
+        const x = i * step;
+        const y = h - ((v - yMin) / (yMax - yMin)) * h;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = color;
+      ctx.lineWidth   = 2;
+      ctx.lineJoin    = 'round';
+      ctx.stroke();
+
+      if (fill) {
+        ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
+        ctx.fillStyle = fill;
+        ctx.fill();
+      }
+    });
+  }
+}
+
+// ─────────────────────────────────────────────
+//  DOM REFS
+// ─────────────────────────────────────────────
+const elBanner    = document.getElementById('status-banner');
+const elIndicator = document.getElementById('status-indicator');
+const elLabel     = document.getElementById('status-label');
+const elSub       = document.getElementById('status-sub');
+const elPill      = document.getElementById('intensity-pill');
+const elBadge     = document.getElementById('conn-badge');
+const elConnText  = document.getElementById('conn-text');
+const elUptime    = document.getElementById('uptime');
+const elLog       = document.getElementById('event-log');
+const elIPInput   = document.getElementById('ip-input');
+
+// Stat cards
+const elReadings  = document.getElementById('stat-readings');
+const elEvents    = document.getElementById('stat-events');
+const elRate      = document.getElementById('stat-rate');
+const elRSSI      = document.getElementById('stat-rssi');
+
+// Sensor values
+const elGyroMag   = document.getElementById('val-gyromag');
+const elMotion    = document.getElementById('val-motion');
+const elGX = document.getElementById('val-gx');
+const elGY = document.getElementById('val-gy');
+const elGZ = document.getElementById('val-gz');
+const elAX = document.getElementById('val-ax');
+const elAY = document.getElementById('val-ay');
+const elAZ = document.getElementById('val-az');
+
+// Bars
+const barGX = document.getElementById('bar-gx');
+const barGY = document.getElementById('bar-gy');
+const barGZ = document.getElementById('bar-gz');
+const barAX = document.getElementById('bar-ax');
+const barAY = document.getElementById('bar-ay');
+const barAZ = document.getElementById('bar-az');
+
+// Meters
+const meterGyro   = document.getElementById('meter-gyro');
+const meterMotion = document.getElementById('meter-motion');
+
+// ─────────────────────────────────────────────
+//  INIT CHARTS
+// ─────────────────────────────────────────────
+const gyroChart = new LineChart('chart-gyro', [
+  { data: dGX, color: '#00d4ff' },
+  { data: dGY, color: '#00e676' },
+  { data: dGZ, color: '#ffca28' }
+], -3, 3);
+
+const magChart = new LineChart('chart-mag', [
+  { data: dMag, color: '#ff1744', fill: 'rgba(255,23,68,0.08)' }
+], 0, 3);
+
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let lastTremor = false;
+let startTime  = Date.now();
+let ws;
+
+// ─────────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────────
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function pct(v, max) { return (clamp(Math.abs(v), 0, max) / max * 100).toFixed(1) + '%'; }
+function fmt(v) { return (v >= 0 ? '+' : '') + v.toFixed(3); }
+
+function logEvent(msg, cls) {
+  const t  = new Date().toLocaleTimeString();
+  const el = document.createElement('span');
+  el.className = `log-entry ${cls}`;
+  el.textContent = `[${t}] ${msg}`;
+  elLog.prepend(el);
+  // Keep log under 50 entries
+  while (elLog.children.length > 50) elLog.removeChild(elLog.lastChild);
+}
+
+// ─────────────────────────────────────────────
+//  UPDATE UI FROM DATA
+// ─────────────────────────────────────────────
+function applyData(d) {
+  // Connection status
+  if (d.esp32Online) {
+    elBadge.className = 'conn-badge online';
+    elConnText.textContent = 'ESP32 ONLINE';
+  } else {
+    elBadge.className = 'conn-badge offline';
+    elConnText.textContent = 'ESP32 OFFLINE';
+  }
+
+  // Tremor status
+  const tremor = d.tremor;
+  if (tremor !== lastTremor) {
+    logEvent(
+      tremor
+        ? `⚠️ TREMOR DETECTED — ${d.intensity} (${d.gyroMag.toFixed(3)} rad/s)`
+        : `✓ Tremor resolved`,
+      tremor ? 'tremor-on' : 'tremor-off'
+    );
+    lastTremor = tremor;
+  }
+
+  elBanner.className    = 'status-banner' + (tremor ? ' tremor-active' : '');
+  elIndicator.className = 'status-indicator' + (tremor ? ' active' : '');
+  elIndicator.textContent = tremor ? '🔴' : '🟢';
+  elLabel.textContent   = tremor ? 'TREMOR DETECTED' : 'NO TREMOR';
+  elLabel.className     = tremor ? 'active' : '';
+  elSub.textContent     = tremor
+    ? `Intensity: ${d.intensity} | Magnitude: ${d.gyroMag.toFixed(3)} rad/s`
+    : 'Monitoring active — gyroscope stable';
+
+  // Intensity pill colours
+  const pillColors = {
+    NONE:     ['#00e676','rgba(0,230,118,0.12)'],
+    MINIMAL:  ['#ffca28','rgba(255,202,40,0.12)'],
+    MILD:     ['#ff9800','rgba(255,152,0,0.12)'],
+    MODERATE: ['#ff7043','rgba(255,112,67,0.12)'],
+    SEVERE:   ['#ff1744','rgba(255,23,68,0.12)']
+  };
+  const [pc, bg] = pillColors[d.intensity] || pillColors.NONE;
+  elPill.textContent = d.intensity;
+  elPill.style.borderColor = pc;
+  elPill.style.color = pc;
+  elPill.style.background = bg;
+
+  // Stats
+  elReadings.textContent = d.totalReadings?.toLocaleString() || '—';
+  elEvents.textContent   = d.tremorEvents?.toLocaleString()  || '—';
+  elRate.textContent     = d.tremorRate ? d.tremorRate + '%' : '—';
+  elRSSI.textContent     = d.rssi ? d.rssi + ' dBm' : '—';
+
+  // Gyro magnitude
+  elGyroMag.innerHTML   = d.gyroMag.toFixed(3) + '<span class="card-unit">rad/s</span>';
+  meterGyro.style.width = pct(d.gyroMag, 2.5);
+
+  // Motion level
+  elMotion.innerHTML    = d.motionLevel.toFixed(3) + '<span class="card-unit">combined</span>';
+  meterMotion.style.width = pct(d.motionLevel, 2.5);
+
+  // Gyro axes
+  elGX.textContent = fmt(d.gx); barGX.style.width = pct(d.gx, 3);
+  elGY.textContent = fmt(d.gy); barGY.style.width = pct(d.gy, 3);
+  elGZ.textContent = fmt(d.gz); barGZ.style.width = pct(d.gz, 3);
+
+  // Accel axes
+  elAX.textContent = fmt(d.ax); barAX.style.width = pct(d.ax, 15);
+  elAY.textContent = fmt(d.ay); barAY.style.width = pct(d.ay, 15);
+  elAZ.textContent = fmt(d.az); barAZ.style.width = pct(d.az, 15);
+
+  // Charts — push new values, shift old ones
+  dGX.push(d.gx);  dGX.shift();
+  dGY.push(d.gy);  dGY.shift();
+  dGZ.push(d.gz);  dGZ.shift();
+  dMag.push(d.gyroMag); dMag.shift();
+
+  gyroChart.draw();
+  magChart.draw();
+
+  // Uptime
+  const sec = Math.floor((Date.now() - startTime) / 1000);
+  const mm  = String(Math.floor(sec/60)).padStart(2,'0');
+  const ss  = String(sec%60).padStart(2,'0');
+  elUptime.textContent = `${mm}:${ss}`;
+}
+
+// ─────────────────────────────────────────────
+//  WEBSOCKET
+// ─────────────────────────────────────────────
+function connectWS() {
+  ws = new WebSocket(WS_URL);
+
+  ws.onopen = () => {
+    logEvent('WebSocket connected to backend', '');
+    console.log('[WS] Connected');
+  };
+
+  ws.onmessage = (ev) => {
+    try {
+      const d = JSON.parse(ev.data);
+      applyData(d);
+    } catch(e) {
+      console.warn('[WS] Parse error', e);
+    }
+  };
+
+  ws.onclose = () => {
+    elBadge.className = 'conn-badge offline';
+    elConnText.textContent = 'RECONNECTING…';
+    logEvent('WebSocket disconnected — retrying in 2s…', '');
+    setTimeout(connectWS, 2000);
+  };
+
+  ws.onerror = () => ws.close();
+}
+
+// ─────────────────────────────────────────────
+//  POLLING FALLBACK (if WebSocket unavailable)
+// ─────────────────────────────────────────────
+function startPolling() {
+  async function poll() {
+    try {
+      const res = await fetch('/api/data');
+      const d   = await res.json();
+      applyData(d);
+    } catch(e) { /* silent */ }
+    setTimeout(poll, 100);
+  }
+  poll();
+}
+
+// ─────────────────────────────────────────────
+//  IP UPDATE
+// ─────────────────────────────────────────────
+async function updateIP() {
+  const ip = elIPInput.value.trim();
+  if (!ip) return;
+  try {
+    await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ip })
+    });
+    logEvent(`ESP32 IP updated to ${ip}`, '');
+    elIPInput.value = '';
+  } catch(e) {
+    logEvent('Could not update IP (server offline?). Using direct polling.', '');
+    // If backend not running, poll ESP32 directly
+    startDirectPoll(ip);
+  }
+}
+
+// Direct ESP32 polling (no backend)
+function startDirectPoll(ip) {
+  async function poll() {
+    try {
+      const res = await fetch(`http://${ip}/data`);
+      const d   = await res.json();
+      d.esp32Online  = true;
+      d.totalReadings = (d.totalReadings || 0) + 1;
+      d.tremorEvents  = d.tremorEvents  || 0;
+      d.tremorRate    = '0.0';
+      applyData(d);
+    } catch(e) {
+      applyData({ tremor:false, intensity:'NONE', gyroMag:0, motionLevel:0,
+        gx:0,gy:0,gz:0,ax:0,ay:0,az:0, rssi:0, esp32Online:false,
+        totalReadings:0, tremorEvents:0, tremorRate:'0.0' });
+    }
+    setTimeout(poll, 100);
+  }
+  poll();
+}
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+logEvent('Neuro Detect dashboard loaded', '');
+
+// Try WebSocket first; fall back to REST polling
+try {
+  connectWS();
+} catch(e) {
+  startPolling();
+}
+
+// Redraw charts on resize
+window.addEventListener('resize', () => {
+  gyroChart.resize(); gyroChart.draw();
+  magChart.resize();  magChart.draw();
+});
+
+// ═══════════════════════════════════════════════
+//  ALZHEIMER RISK SCORING
+// ═══════════════════════════════════════════════
+const riskState = {
+  tremorFactor:     0,   // 0–33: from tremor monitoring
+  memoryFactor:     0,   // 0–33: from memory test
+  reactionFactor:   0,   // 0–34: from reaction test
+};
+
+function updateRiskPanel() {
+  const total = Math.min(100, Math.round(
+    riskState.tremorFactor + riskState.memoryFactor + riskState.reactionFactor
+  ));
+
+  // Arc: full arc stroke-dasharray = 157, 0 = full, 157 = empty
+  const arc = document.getElementById('risk-arc');
+  const offset = 157 - (total / 100) * 157;
+  arc.style.strokeDashoffset = offset;
+
+  // Colour by risk level
+  let strokeColor, detail, rfTremor = '', rfMemory = '', rfReact = '', rfConsist = '';
+
+  if (total < 25) {
+    strokeColor = '#00e676';
+    detail = 'Low risk profile. All indicators within normal ranges. Continue periodic monitoring.';
+  } else if (total < 50) {
+    strokeColor = '#ffca28';
+    detail = 'Moderate risk. One or more cognitive markers are mildly elevated. Consider repeating tests regularly and consulting a physician.';
+    rfTremor = riskState.tremorFactor > 10 ? 'active' : '';
+    rfMemory = riskState.memoryFactor > 10 ? 'active' : '';
+    rfReact  = riskState.reactionFactor > 10 ? 'active' : '';
+  } else if (total < 75) {
+    strokeColor = '#ff7043';
+    detail = 'Elevated risk. Multiple markers showing concern. Clinical evaluation is recommended.';
+    rfTremor = riskState.tremorFactor > 10 ? 'concern' : '';
+    rfMemory = riskState.memoryFactor > 10 ? 'concern' : '';
+    rfReact  = riskState.reactionFactor > 10 ? 'concern' : '';
+    rfConsist = 'active';
+  } else {
+    strokeColor = '#ff1744';
+    detail = 'High risk profile. Significant markers across multiple domains. Please consult a neurologist promptly.';
+    rfTremor = 'concern'; rfMemory = 'concern'; rfReact = 'concern'; rfConsist = 'concern';
+  }
+
+  arc.style.stroke = strokeColor;
+  document.getElementById('risk-score-label').textContent = total + '%';
+  document.getElementById('risk-score-label').style.color = strokeColor;
+  document.getElementById('risk-detail').textContent = detail;
+
+  document.getElementById('rf-tremor').className     = 'risk-factor-dot ' + rfTremor;
+  document.getElementById('rf-memory').className     = 'risk-factor-dot ' + rfMemory;
+  document.getElementById('rf-reaction').className   = 'risk-factor-dot ' + rfReact;
+  document.getElementById('rf-consistency').className = 'risk-factor-dot ' + rfConsist;
+}
+
+// Feed tremor data into risk score
+(function patchApplyData() {
+  const _orig = window.applyData || function(){};
+  window._tremorEventCount = 0;
+  window._prevApplyData = _orig;
+})();
+
+// We'll hook into the tremor rate after applyData is defined — done at bottom
+
+// ═══════════════════════════════════════════════
+//  MEMORY SEQUENCE TEST
+// ═══════════════════════════════════════════════
+const MEM = {
+  state:      'idle',   // idle | show | input | feedback
+  sequence:   [],
+  level:      1,
+  streak:     0,
+  score:      0,
+  best:       0,
+  showTimer:  null,
+};
+
+const CHARS = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+
+function memRandSeq(len) {
+  let s = '';
+  for (let i = 0; i < len; i++) s += CHARS[Math.floor(Math.random() * CHARS.length)];
+  return s;
+}
+
+function memStart() {
+  if (MEM.state === 'show') return;
+  MEM.state = 'show';
+  MEM.sequence = memRandSeq(MEM.level + 2).split(''); // level 1 = 3 chars, level 5 = 7 chars
+
+  document.getElementById('mem-input').disabled = true;
+  document.getElementById('mem-input').value = '';
+  document.getElementById('mem-submit-btn').disabled = true;
+  document.getElementById('mem-start-btn').disabled = true;
+
+  const seqEl   = document.getElementById('mem-sequence');
+  const promptEl = document.getElementById('mem-prompt');
+  seqEl.style.display = 'flex';
+  promptEl.style.display = 'none';
+
+  // Show each character one at a time
+  let idx = 0;
+  function showNext() {
+    if (idx < MEM.sequence.length) {
+      seqEl.textContent = MEM.sequence[idx];
+      seqEl.style.opacity = '1';
+      idx++;
+      MEM.showTimer = setTimeout(() => {
+        seqEl.style.opacity = '0';
+        setTimeout(showNext, 300);
+      }, 700);
+    } else {
+      // Done showing — prompt user to type
+      seqEl.style.display = 'none';
+      promptEl.textContent = `Enter the ${MEM.sequence.length}-character sequence`;
+      promptEl.style.display = 'block';
+      MEM.state = 'input';
+      document.getElementById('mem-input').disabled = false;
+      document.getElementById('mem-input').focus();
+      document.getElementById('mem-submit-btn').disabled = false;
+      document.getElementById('mem-start-btn').disabled = false;
+    }
+  }
+  showNext();
+}
+
+function memSubmit() {
+  if (MEM.state !== 'input') return;
+  const answer = document.getElementById('mem-input').value.toUpperCase().replace(/\s/g,'');
+  const correct = MEM.sequence.join('');
+  const resultEl = document.getElementById('mem-result');
+
+  document.getElementById('mem-input').disabled = true;
+  document.getElementById('mem-submit-btn').disabled = true;
+
+  if (answer === correct) {
+    MEM.streak++;
+    MEM.score += MEM.level * 10;
+    if (MEM.score > MEM.best) MEM.best = MEM.score;
+    if (MEM.streak % 2 === 0 && MEM.level < 6) MEM.level++;
+
+    resultEl.className = 'cog-result show good';
+    resultEl.textContent = `✓ Correct! "${correct}" — +${MEM.level * 10} pts`;
+    logEvent(`Memory test PASS — Level ${MEM.level}, streak ${MEM.streak}`, '');
+
+    // Good memory → lower risk contribution
+    riskState.memoryFactor = Math.max(0, riskState.memoryFactor - 5);
+  } else {
+    MEM.streak = 0;
+    if (MEM.level > 1) MEM.level--;
+
+    resultEl.className = 'cog-result show bad';
+    resultEl.textContent = `✗ Incorrect. The sequence was "${correct}"`;
+    logEvent(`Memory test FAIL — Expected "${correct}", got "${answer}"`, 'tremor-on');
+
+    // Failed recall → raise risk
+    riskState.memoryFactor = Math.min(33, riskState.memoryFactor + 12);
+  }
+
+  // Update UI stats
+  document.getElementById('mem-score').textContent  = MEM.score;
+  document.getElementById('mem-level').textContent  = MEM.level;
+  document.getElementById('mem-streak').textContent = MEM.streak;
+  document.getElementById('mem-best').textContent   = MEM.best;
+
+  updateRiskPanel();
+
+  // Show "NEXT" on start button
+  document.getElementById('mem-start-btn').textContent = 'NEXT';
+  document.getElementById('mem-prompt').textContent = 'Press NEXT for another sequence';
+
+  // Hide result after 3s
+  setTimeout(() => {
+    resultEl.className = 'cog-result';
+    document.getElementById('mem-start-btn').textContent = 'START';
+  }, 3500);
+
+  MEM.state = 'idle';
+}
+
+// Allow Enter key to submit
+document.getElementById('mem-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') memSubmit();
+});
+
+
+// ═══════════════════════════════════════════════
+//  REACTION SPEED TEST
+// ═══════════════════════════════════════════════
+const REACT = {
+  state:     'idle',  // idle | waiting | go | done
+  goTime:    0,
+  times:     [],
+  timer:     null,
+};
+
+// Reaction thresholds (ms) — based on clinical literature
+// ── Reaction thresholds (ms) — 5-tier clinical categorisation ──
+// Based on published simple reaction time norms for adults
+const REACT_CAT = [
+  { max: 300,  label: 'NORMAL',   cls: 'normal',   rClass: 'good', icon: '⚡',
+    msg: (rt) => `⚡ Normal — ${rt}ms. Excellent processing speed. No cognitive concern.`,
+    riskDelta: -4 },
+  { max: 450,  label: 'MILD',     cls: 'mild',     rClass: 'good', icon: '✓',
+    msg: (rt) => `✓ Mild — ${rt}ms. Slightly above peak, but within healthy adult range.`,
+    riskDelta: 2 },
+  { max: 650,  label: 'MODERATE', cls: 'moderate', rClass: 'warn', icon: '⚠',
+    msg: (rt) => `⚠ Moderate — ${rt}ms. Noticeable delay. May reflect fatigue or early cognitive slowing.`,
+    riskDelta: 10 },
+  { max: 900,  label: 'SEVERE',   cls: 'severe',   rClass: 'warn', icon: '⚠',
+    msg: (rt) => `⚠ Severe — ${rt}ms. Significant delay. Consistent results at this level warrant clinical attention.`,
+    riskDelta: 20 },
+  { max: Infinity, label: 'CRITICAL', cls: 'critical', rClass: 'bad', icon: '🔴',
+    msg: (rt) => `🔴 Critical — ${rt}ms. Markedly impaired reaction speed. Please consult a neurologist.`,
+    riskDelta: 30 },
+];
+
+function getReactCat(rt) {
+  return REACT_CAT.find(c => rt < c.max);
+}
+
+function reactClick() {
+  const zone    = document.getElementById('react-zone');
+  const text    = document.getElementById('react-text');
+  const resultEl = document.getElementById('react-result');
+
+  if (REACT.state === 'idle') {
+    // Start waiting phase
+    REACT.state = 'waiting';
+    zone.className = 'react-zone waiting';
+    text.innerHTML = '⏳ Wait for GREEN...';
+    document.getElementById('react-zone').querySelector('.react-zone-icon').textContent = '⏳';
+
+    const delay = 1500 + Math.random() * 3500; // 1.5–5s random
+    REACT.timer = setTimeout(() => {
+      REACT.state = 'go';
+      REACT.goTime = Date.now();
+      zone.className = 'react-zone go';
+      zone.querySelector('.react-zone-icon').textContent = '🟢';
+      text.innerHTML = 'TAP NOW!';
+    }, delay);
+
+  } else if (REACT.state === 'waiting') {
+    // Tapped too early!
+    clearTimeout(REACT.timer);
+    REACT.state = 'idle';
+    zone.className = 'react-zone early';
+    zone.querySelector('.react-zone-icon').textContent = '❌';
+    text.innerHTML = 'Too early! Tap to try again.';
+    resultEl.className = 'cog-result show bad';
+    resultEl.textContent = '✗ Too early — wait for the green signal before tapping.';
+    logEvent('Reaction test — tapped too early', 'tremor-on');
+
+    // Early taps are a minor risk signal
+    riskState.reactionFactor = Math.min(34, riskState.reactionFactor + 3);
+    updateRiskPanel();
+
+    setTimeout(() => {
+      resultEl.className = 'cog-result';
+      zone.className = 'react-zone';
+      zone.querySelector('.react-zone-icon').textContent = '👆';
+      text.innerHTML = 'TAP TO START';
+    }, 2000);
+
+  } else if (REACT.state === 'go') {
+    // Measure reaction
+    const rt = Date.now() - REACT.goTime;
+    REACT.state = 'done';
+    REACT.times.push(rt);
+
+    const avg  = Math.round(REACT.times.reduce((a,b)=>a+b,0) / REACT.times.length);
+    const best = Math.min(...REACT.times);
+
+    document.getElementById('react-last').textContent  = rt;
+    document.getElementById('react-avg').textContent   = avg;
+    document.getElementById('react-best').textContent  = best;
+    document.getElementById('react-tries').textContent = REACT.times.length;
+
+    // Add chip to history
+    const cat = getReactCat(rt);
+    const chip = document.createElement('div');
+    chip.className = 'react-chip ' + cat.cls;
+    chip.textContent = rt + 'ms · ' + cat.label;
+    document.getElementById('react-history').prepend(chip);
+    // Keep only last 8
+    const history = document.getElementById('react-history');
+    while (history.children.length > 8) history.removeChild(history.lastChild);
+
+    // Result message + risk update
+    let rClass = cat.rClass;
+    let rMsg   = cat.msg(rt);
+    let riskDelta = cat.riskDelta;
+
+    // Bonus penalty for high variability across trials (inconsistency = extra risk signal)
+    if (REACT.times.length >= 3) {
+      const mean = avg;
+      const variance = REACT.times.reduce((s,v)=>s+Math.pow(v-mean,2),0) / REACT.times.length;
+      const stdDev = Math.sqrt(variance);
+      if (stdDev > 150) { riskDelta += 8; rMsg += ' (High variability detected.)'; }
+      else if (stdDev > 100) { riskDelta += 4; }
+    }
+
+    riskState.reactionFactor = Math.max(0, Math.min(34, riskState.reactionFactor + riskDelta));
+    updateRiskPanel();
+
+    resultEl.className = `cog-result show ${rClass}`;
+    resultEl.textContent = rMsg;
+    logEvent(`Reaction: ${rt}ms — ${cat.label} (avg ${avg}ms, ${REACT.times.length} trials)`, cat.cls === 'severe' || cat.cls === 'critical' ? 'tremor-on' : '');
+
+    zone.className = 'react-zone done';
+    zone.querySelector('.react-zone-icon').textContent = cat.icon;
+    text.innerHTML = `${rt}ms · <strong>${cat.label}</strong> — Tap to retry`;
+
+    setTimeout(() => {
+      REACT.state = 'idle';
+      resultEl.className = 'cog-result';
+    }, 2500);
+
+  } else if (REACT.state === 'done') {
+    // Reset to idle and start fresh
+    REACT.state = 'idle';
+    zone.className = 'react-zone';
+    zone.querySelector('.react-zone-icon').textContent = '👆';
+    text.innerHTML = 'TAP TO START';
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  HOOK TREMOR DATA INTO RISK SCORE
+//  (runs after applyData is defined above)
+// ═══════════════════════════════════════════════
+(function hookTremor() {
+  // Patch applyData to also update tremor risk
+  const _orig = applyData;
+  let _tremorEventCount = 0;
+  window.applyData = function(d) {
+    _orig(d);
+    // Count tremor events
+    if (d.tremor) _tremorEventCount++;
+    const rate = parseFloat(d.tremorRate) || 0;
+    // Map tremor rate 0–30% → risk 0–33
+    riskState.tremorFactor = Math.min(33, Math.round(rate * 1.1));
+    updateRiskPanel();
+  };
+})();
+
+// Initial risk render
+updateRiskPanel();
+
+   // ═══════════════════════════════════════════════
+//  PATIENT MANAGER
+// ═══════════════════════════════════════════════
+(function setupPatientManager() {
+
+  const STORAGE_KEY = 'neuro_detect_patients';
+  let patients = [];
+  let activePatient = null;
+
+  // ── Load from localStorage ──
+  function loadPatients() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      patients = raw ? JSON.parse(raw) : [];
+    } catch(e) { patients = []; }
+  }
+
+  // ── Save to localStorage ──
+  function savePatients() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(patients));
+  }
+
+  // ── Generate unique ID ──
+  function genId() {
+    return 'P' + Date.now().toString(36).toUpperCase();
+  }
+
+  // ── Open/close modal ──
+  window.openPatientModal = function() {
+    loadPatients();
+    renderPatientList();
+    document.getElementById('patient-overlay').classList.add('open');
+    // Set today's date as default
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('np-date').value = today;
+  };
+
+  window.closePatientModal = function() {
+    document.getElementById('patient-overlay').classList.remove('open');
+  };
+
+  // Close on overlay click
+  document.getElementById('patient-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closePatientModal();
+  });
+
+  // ── Switch tabs ──
+  window.switchTab = function(tab) {
+    document.getElementById('tab-list').style.display = tab === 'list' ? 'block' : 'none';
+    document.getElementById('tab-new').style.display  = tab === 'new'  ? 'block' : 'none';
+    document.querySelectorAll('.modal-tab').forEach((t, i) => {
+      t.classList.toggle('active', (i === 0 && tab === 'list') || (i === 1 && tab === 'new'));
+    });
+  };
+
+  // ── Render patient list ──
+  function renderPatientList() {
+    const container = document.getElementById('patient-list-container');
+    if (patients.length === 0) {
+      container.innerHTML = `<div style="font-family:var(--mono);font-size:12px;color:var(--text-muted);text-align:center;padding:20px;">No patients registered yet. Add a new patient.</div>`;
+      return;
+    }
+
+    container.innerHTML = '';
+    patients.forEach(p => {
+      const isActive = activePatient && activePatient.id === p.id;
+      const div = document.createElement('div');
+      div.className = 'patient-card-item' + (isActive ? ' selected' : '');
+      div.innerHTML = `
+        <div class="pci-info">
+          <div class="pci-name">${p.name}</div>
+          <div class="pci-meta">Age: ${p.age} &nbsp;·&nbsp; Since: ${p.date} &nbsp;·&nbsp; Sessions: ${p.sessions || 1}</div>
+        </div>
+        <div class="pci-serial">${p.serial}</div>
+        <button class="pci-delete" onclick="deletePatient('${p.id}', event)" title="Delete">✕</button>
+      `;
+      div.addEventListener('click', () => selectPatient(p.id));
+      container.appendChild(div);
+    });
+  }
+
+  // ── Save new patient ──
+  window.saveNewPatient = function() {
+    const name   = document.getElementById('np-name').value.trim();
+    const age    = document.getElementById('np-age').value.trim();
+    const date   = document.getElementById('np-date').value;
+    const serial = document.getElementById('np-serial').value.trim();
+    const errEl  = document.getElementById('np-error');
+
+    // Validation
+    if (!name || !age || !date || !serial) {
+      errEl.textContent = '⚠ All fields are required.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (isNaN(age) || age < 1 || age > 120) {
+      errEl.textContent = '⚠ Please enter a valid age (1–120).';
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+
+    const newPatient = {
+      id:       genId(),
+      name:     name,
+      age:      parseInt(age),
+      date:     date,
+      serial:   serial,
+      sessions: 1,
+      createdAt: new Date().toISOString(),
+      history:  []
+    };
+
+    loadPatients();
+    patients.push(newPatient);
+    savePatients();
+
+    // Clear form
+    document.getElementById('np-name').value   = '';
+    document.getElementById('np-age').value    = '';
+    document.getElementById('np-serial').value = '';
+
+    // Switch to list and select the new patient
+    switchTab('list');
+    renderPatientList();
+    selectPatient(newPatient.id);
+    logEvent(`New patient registered: ${name} (Serial: ${serial})`, '');
+  };
+
+  // ── Select / activate a patient ──
+  function selectPatient(id) {
+    loadPatients();
+    const p = patients.find(x => x.id === id);
+    if (!p) return;
+
+    // Increment session count
+    p.sessions = (p.sessions || 1) + 1;
+    p.lastUsed = new Date().toISOString();
+    savePatients();
+
+    activePatient = p;
+    updateActiveBar(p);
+    closePatientModal();
+    logEvent(`Patient selected: ${p.name} | Age: ${p.age} | Serial: ${p.serial}`, '');
+  }
+
+  // ── Delete a patient ──
+  window.deletePatient = function(id, event) {
+    event.stopPropagation();
+    if (!confirm('Delete this patient record? This cannot be undone.')) return;
+    loadPatients();
+    patients = patients.filter(x => x.id !== id);
+    savePatients();
+    if (activePatient && activePatient.id === id) {
+      activePatient = null;
+      document.getElementById('active-patient-bar').classList.remove('show');
+    }
+    renderPatientList();
+    logEvent('Patient record deleted.', '');
+  };
+
+  // ── Update the top active patient bar ──
+  function updateActiveBar(p) {
+    const bar = document.getElementById('active-patient-bar');
+    document.getElementById('apb-name').textContent   = p.name;
+    document.getElementById('apb-meta').textContent   = `Age: ${p.age}  ·  First used: ${p.date}`;
+    document.getElementById('apb-serial').textContent = `Serial: ${p.serial}`;
+    document.getElementById('apb-session').textContent = `Session #${p.sessions}`;
+    bar.classList.add('show');
+  }
+
+  // ── Auto-open modal if no patient selected ──
+  loadPatients();
+  if (patients.length === 0) {
+    setTimeout(() => openPatientModal(), 800);
+  } else {
+    // Auto-select last used patient
+    const last = patients.reduce((a, b) =>
+      (a.lastUsed || a.createdAt) > (b.lastUsed || b.createdAt) ? a : b
+    );
+    activePatient = last;
+    updateActiveBar(last);
+  }
+
+})();
+// ═══════════════════════════════════════════════
+//  PARKINSON'S RISK ASSESSMENT
+// ═══════════════════════════════════════════════
+(function setupPDAssessment() {
+
+  // Rolling window: store last 60 gyroMag readings (~6 seconds at 10Hz)
+  const MAG_WINDOW = [];
+  const WINDOW_SIZE = 60;
+
+  // Thresholds
+  // intensity string → direct assessment
+  const PD_LEVELS = {
+    NONE: {
+      title: 'No Tremor Detected',
+      badge: 'NO RISK',
+      message: 'No significant tremor is currently detected. If this is consistent over time, tremor is not a present concern. Keep monitoring.',
+      icon: '🔵',
+      borderColor: '#5a7a96',
+      badgeBorder: '#5a7a96',
+      badgeColor: '#5a7a96',
+      badgeBg: 'transparent',
+    },
+    MINIMAL: {
+      title: 'Minimal Tremor — Likely Stress or Anxiety',
+      badge: 'LOW CONCERN',
+      message: 'Tremor magnitude is very low. Based on the graph trend, this level of movement is consistent with physiological tremor caused by stress, fatigue, caffeine, or anxiety — not typically associated with Parkinson\'s disease.',
+      icon: '🟡',
+      borderColor: '#ffca28',
+      badgeBorder: '#ffca28',
+      badgeColor: '#ffca28',
+      badgeBg: 'rgba(255,202,40,0.12)',
+    },
+    MILD: {
+      title: 'Mild Tremor — Slight Parkinson\'s Possibility',
+      badge: 'SLIGHT RISK',
+      message: 'Mild persistent tremor has been detected. While this can still be caused by stress, anxiety, essential tremor, or medication, there is a slight possibility of early-stage Parkinson\'s disease. Monitoring over time and a clinical consultation is advised.',
+      icon: '🟠',
+      borderColor: '#ff9800',
+      badgeBorder: '#ff9800',
+      badgeColor: '#ff9800',
+      badgeBg: 'rgba(255,152,0,0.12)',
+    },
+    MODERATE: {
+      title: 'Moderate Tremor — Elevated Parkinson\'s Concern',
+      badge: 'ELEVATED RISK',
+      message: 'Moderate sustained tremor detected across multiple axes. This pattern raises concern for a movement disorder. Parkinson\'s disease is a possible cause alongside essential tremor or other neurological conditions. A neurological evaluation is strongly recommended.',
+      icon: '🔴',
+      borderColor: '#ff7043',
+      badgeBorder: '#ff7043',
+      badgeColor: '#ff7043',
+      badgeBg: 'rgba(255,112,67,0.15)',
+    },
+    SEVERE: {
+      title: 'Severe Tremor — High Parkinson\'s Likelihood',
+      badge: 'HIGH RISK',
+      message: 'Severe, high-magnitude tremor is consistently present. This profile is strongly associated with Parkinson\'s disease or another serious neurological condition. Please consult a neurologist promptly. Do not use this reading alone as a diagnosis.',
+      icon: '🚨',
+      borderColor: '#ff1744',
+      badgeBorder: '#ff1744',
+      badgeColor: '#ff1744',
+      badgeBg: 'rgba(255,23,68,0.15)',
+    },
+  };
+
+  function updatePDPanel(intensity, gyroMag, gyroHistory) {
+    // Determine if tremor is low-level sustained (stress/anxiety) vs high
+    // If intensity is NONE but there has been some motion, check graph trend
+    let level = intensity;
+
+    // If sensor says no tremor but magnitude is creeping (0.1–0.25) → classify as MINIMAL
+    if (intensity === 'NONE' && gyroMag > 0.08 && gyroMag < 0.3) {
+      level = 'MINIMAL';
+    }
+
+    const cfg = PD_LEVELS[level] || PD_LEVELS.NONE;
+    const panel   = document.getElementById('pd-panel');
+    const iconEl  = document.getElementById('pd-icon');
+    const titleEl = document.getElementById('pd-title');
+    const msgEl   = document.getElementById('pd-message');
+    const badgeEl = document.getElementById('pd-badge');
+
+    panel.style.borderColor = cfg.borderColor;
+    iconEl.textContent = cfg.icon;
+    iconEl.style.borderColor = cfg.borderColor;
+    iconEl.style.background  = cfg.badgeBg || 'var(--surface2)';
+
+    titleEl.textContent = cfg.title;
+    titleEl.style.color = cfg.badgeColor;
+
+    msgEl.textContent = cfg.message;
+
+    badgeEl.textContent = cfg.badge;
+    badgeEl.style.borderColor = cfg.badgeBorder;
+    badgeEl.style.color       = cfg.badgeColor;
+    badgeEl.style.background  = cfg.badgeBg;
+  }
+
+  // Patch into existing applyData
+  const _prev = window.applyData;
+  window.applyData = function(d) {
+    _prev(d);
+
+    // Maintain rolling magnitude window
+    MAG_WINDOW.push(d.gyroMag || 0);
+    if (MAG_WINDOW.length > WINDOW_SIZE) MAG_WINDOW.shift();
+
+    updatePDPanel(d.intensity || 'NONE', d.gyroMag || 0, MAG_WINDOW);
+  };
+
+  // Initial render
+  updatePDPanel('NONE', 0, []);
+})();
+</script>
+</body>
+</html>
