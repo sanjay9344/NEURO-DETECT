@@ -305,3 +305,13 @@ You should see JSON like:
 ---
 
 *Neuro Detect v1.0 — ESP32 + MPU6050 Tremor Detection System*
+
+---
+
+## 12. VOICE ALERTS & AI INSIGHTS (added)
+
+**Voice note.** When an alert fires (1 minute of continuous MODERATE/SEVERE hand movement, a fall/spike alert if re-enabled, or the Test Alert button) the dashboard speaks a message using the browser's built-in speech synthesis — same trigger point as the siren/chime and WhatsApp dispatch. It repeats every 15 s (max 4 times) while the alert overlay is open and stops on *Mute & Dismiss*. Toggle it with the **🔊 Voice** button in the alerts panel; **🔁 Replay Voice** is in the overlay. Browsers only allow sound after a first click/tap on the page, so click anywhere once after opening the dashboard.
+
+**AI insights (optional).** History panel → *AI Insights*: plain-language summary, clinical-style note, and free-text Q&A over the stored history. Enable by adding `GEMINI_API_KEY` (free tier, Google AI Studio) or `ANTHROPIC_API_KEY` to `backend/.env` (see `.env.example`) and restarting. Needs Node 18+. Only aggregated numbers are sent to the API — never the patient's name, phone numbers or IDs. AI is never in the alert path.
+#   N E U R O - D E T E C T  
+ 
