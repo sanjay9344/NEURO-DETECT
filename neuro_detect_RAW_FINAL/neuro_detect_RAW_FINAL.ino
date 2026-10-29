@@ -20,8 +20,8 @@
 // ─────────────────────────────────────────────
 //  WIFI CREDENTIALS
 // ─────────────────────────────────────────────
-const char* WIFI_SSID     = "Sannidhi";
-const char* WIFI_PASSWORD = "1234abcd";
+const char* WIFI_SSID     = "SSID_NAME_HERE";
+const char* WIFI_PASSWORD = "ENTER ACTUAL PASSWORD HERE";
 
 // ─────────────────────────────────────────────
 //  MPU6050 I2C ADDRESS & REGISTERS
