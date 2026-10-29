@@ -995,6 +995,135 @@ footer {
 }
 .modal-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
+/* ══════════════════════════════════════════════
+   READING HISTORY
+══════════════════════════════════════════════ */
+#history-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+#history-overlay.open { display: flex; }
+
+.history-modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  width: 760px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  position: relative;
+}
+
+.history-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 18px;
+}
+.history-controls .field { flex: 1 1 160px; min-width: 140px; margin-bottom: 0; }
+.history-quickbtns { display: flex; gap: 6px; }
+
+.history-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+@media (max-width: 620px) { .history-summary-grid { grid-template-columns: repeat(2, 1fr); } }
+.hs-card {
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  background: var(--surface2);
+}
+.hs-card .hs-count { font-family: var(--mono); font-size: 20px; font-weight: 700; }
+.hs-card .hs-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
+
+.history-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+}
+.history-meta-row b { color: var(--text); }
+
+.hh-strip { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; margin-bottom: 18px; }
+.hh-block { height: 28px; border-radius: 3px; background: var(--surface2); border: 1px solid var(--border); position: relative; }
+.hh-block-label { text-align: center; font-family: var(--mono); font-size: 8px; color: var(--text-muted); margin-top: 3px; }
+
+.history-filter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.history-filter-row select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 5px 8px;
+}
+
+.history-table-wrap { max-height: 320px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; }
+.history-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 11px; }
+.history-table th {
+  position: sticky; top: 0;
+  background: var(--surface2);
+  text-align: left;
+  padding: 8px 10px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 9px;
+  border-bottom: 1px solid var(--border);
+}
+.history-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); color: var(--text); }
+.history-table tr:last-child td { border-bottom: none; }
+
+.hi-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  border: 1px solid currentColor;
+}
+
+.history-empty {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 32px 16px;
+  border: 1px dashed var(--border2);
+  border-radius: 10px;
+}
+
 /* Form fields */
 .field-group {
   display: flex;
@@ -1114,6 +1243,39 @@ footer {
   font-size: 11px;
   color: var(--text-muted);
 }
+.apb-phone-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #a0d8ef;
+  background: rgba(0,212,255,0.08);
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,212,255,0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.apb-caretaker-box {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.apb-caretaker-lbl {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--yellow);
+}
+.apb-caretaker-val {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #fff;
+}
 .apb-serial {
   font-family: var(--mono);
   font-size: 11px;
@@ -1128,6 +1290,202 @@ footer {
   border: 1px solid var(--border);
   border-radius: 20px;
 }
+.apb-cooldown {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--orange);
+  background: var(--orange-dim);
+  border: 1px solid rgba(255,112,67,0.3);
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: none;
+}
+.apb-cooldown.active { display: inline-flex; align-items: center; gap: 4px; }
+
+/* ── Emergency Siren & Alert Overlay ── */
+#emergency-alert-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 0, 0, 0.88);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  animation: bg-siren 1s infinite alternate;
+}
+#emergency-alert-overlay.open { display: flex; }
+@keyframes bg-siren {
+  from { background: rgba(10, 0, 0, 0.88); }
+  to   { background: rgba(45, 5, 10, 0.94); }
+}
+
+.emergency-modal {
+  background: #12080a;
+  border: 2px solid var(--red);
+  box-shadow: 0 0 50px rgba(255,23,68,0.5), inset 0 0 30px rgba(255,23,68,0.2);
+  border-radius: 16px;
+  width: 580px;
+  max-width: 95vw;
+  padding: 32px 28px;
+  text-align: center;
+  animation: shake-modal 0.6s infinite alternate;
+}
+@keyframes shake-modal {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.015); }
+}
+
+.emergency-icon-ring {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  border: 3px solid var(--red);
+  background: var(--red-dim);
+  display: grid;
+  place-items: center;
+  font-size: 36px;
+  box-shadow: 0 0 30px rgba(255,23,68,0.6);
+  animation: blink-ring 0.6s infinite alternate;
+}
+@keyframes blink-ring {
+  from { transform: scale(0.95); opacity: 0.8; }
+  to   { transform: scale(1.1); opacity: 1; box-shadow: 0 0 45px rgba(255,23,68,0.9); }
+}
+
+.emg-title {
+  font-family: var(--sans);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--red);
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.emg-desc {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: #ffcdd2;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.emg-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.emg-stat-box {
+  background: rgba(255,23,68,0.08);
+  border: 1px solid rgba(255,23,68,0.3);
+  border-radius: 8px;
+  padding: 10px;
+}
+.emg-stat-lbl {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  display: block;
+}
+.emg-stat-val {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 4px;
+}
+.emg-dispatch-status {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--yellow);
+  background: rgba(255,202,40,0.1);
+  border: 1px solid rgba(255,202,40,0.25);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+.emg-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.emg-actions a, .emg-actions button {
+  text-decoration: none;
+  font-size: 11px;
+  padding: 10px 16px;
+}
+
+/* Continuous high tremor timer bar in status banner */
+.continuous-tremor-meter {
+  display: none;
+  margin-top: 12px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+.continuous-tremor-meter.active { display: block; }
+.ctm-header {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--yellow);
+  margin-bottom: 4px;
+}
+.ctm-track {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.ctm-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--yellow), var(--orange), var(--red));
+  border-radius: 3px;
+  transition: width 0.1s linear;
+}
+
+/* Alert log list items */
+.alert-log-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.alert-log-row:last-child { border-bottom: none; }
+.alert-type-badge {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.alert-type-badge.fall { background: var(--red-dim); color: var(--red); border: 1px solid var(--red); }
+.alert-type-badge.continuous { background: var(--yellow-dim); color: var(--yellow); border: 1px solid var(--yellow); }
+.alert-type-badge.test { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent); }
+.alert-wa-link {
+  color: var(--green);
+  text-decoration: underline;
+  cursor: pointer;
+}
+/* ── Voice alert toggle + AI insights panel ── */
+.ai-panel { border:1px solid var(--border2); background:var(--surface2); border-radius:var(--radius); padding:12px 14px; margin:12px 0; }
+.ai-head { display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:.08em; margin-bottom:8px; }
+.ai-btns, .ai-ask { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px; }
+.ai-ask input { flex:1 1 220px; background:var(--surface); border:1px solid var(--border2); color:var(--text); border-radius:6px; padding:7px 10px; font-family:var(--sans); font-size:12px; }
+.ai-btns select { background:var(--surface); border:1px solid var(--border2); color:var(--text); border-radius:6px; padding:6px 8px; font-family:var(--mono); font-size:11px; }
+.ai-output { white-space:pre-wrap; font-size:13px; line-height:1.55; color:var(--text); background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px; max-height:280px; overflow-y:auto; }
+.ai-output.err { color:var(--yellow); }
+.ai-disclaimer { font-family:var(--mono); font-size:10px; color:var(--text-muted); margin-top:6px; }
 </style>
 </head>
 <body>
@@ -1148,6 +1506,7 @@ footer {
 
     <div class="header-right">
       <button class="patient-btn" type="button" onclick="openPatientModal()">PATIENTS</button>
+      <button class="patient-btn" type="button" onclick="openHistoryModal()">HISTORY</button>
       <div id="conn-badge" class="conn-badge offline">
         <span class="conn-dot"></span>
         <span id="conn-text">CONNECTING</span>
@@ -1165,16 +1524,42 @@ footer {
     <div>
       <div id="apb-name" class="apb-name">No patient selected</div>
       <div id="apb-meta" class="apb-meta">Select or add a patient</div>
+      <div id="apb-phone-tag" class="apb-phone-tag" style="display:none; margin-top:4px;">📱 <span id="apb-patient-phone">--</span></div>
     </div>
+
+    <div id="apb-caretaker-box" class="apb-caretaker-box" style="display:none;">
+      <div>
+        <div class="apb-caretaker-lbl">Caretaker</div>
+        <div id="apb-caretaker-name" class="apb-caretaker-val">--</div>
+      </div>
+      <div id="apb-caretaker-phone-wrap" style="display:flex; align-items:center; gap:6px;">
+        <span id="apb-caretaker-phone" class="apb-phone-tag">📱 --</span>
+        <button id="apb-caretaker-wa-btn" type="button" class="cog-btn" style="padding:4px 8px; font-size:10px;" onclick="openCaretakerWA()">WhatsApp</button>
+      </div>
+    </div>
+
+    <div id="apb-cooldown" class="apb-cooldown">⏳ Cooldown: <span id="apb-cooldown-timer">5:00</span></div>
+    <button id="apb-test-btn" type="button" class="cog-btn" style="padding:5px 12px; font-size:10px;" onclick="testManualAlert()">🧪 Test Alert</button>
     <div id="apb-serial" class="apb-serial">Serial: --</div>
     <div id="apb-session" class="apb-session">Session #0</div>
   </div>
 
   <section id="status-banner" class="status-banner">
     <div id="status-indicator" class="status-indicator">OK</div>
-    <div class="status-text">
+    <div class="status-text" style="flex:1;">
       <h2 id="status-label">NO TREMOR</h2>
       <p id="status-sub">Monitoring active - waiting for sensor data</p>
+
+      <!-- Continuous High Tremor 10-Second Monitor -->
+      <div id="continuous-tremor-meter" class="continuous-tremor-meter">
+        <div class="ctm-header">
+          <span>⚠️ SUSTAINED HIGH TREMOR (HAND MOVING)</span>
+          <span id="ctm-timer-label">0:00 / 3:00</span>
+        </div>
+        <div class="ctm-track">
+          <div id="ctm-fill" class="ctm-fill"></div>
+        </div>
+      </div>
     </div>
     <div id="intensity-pill" class="intensity-pill">NONE</div>
   </section>
@@ -1336,14 +1721,59 @@ footer {
     <div id="event-log"></div>
   </section>
 
+  <!-- WhatsApp & Emergency Alerts Log -->
+  <section class="card" style="margin-bottom: 24px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+      <div class="card-label" style="margin-bottom:0;">🚨 Emergency & Caretaker Alerts Log</div>
+      <div style="display:flex; gap:8px;">
+        <button id="voice-toggle-btn" class="cog-btn" type="button" onclick="toggleVoiceAlerts()" style="padding:4px 10px; font-size:10px;" title="Spoken voice note when an alert fires">🔊 Voice: ON</button>
+        <button class="cog-btn" type="button" onclick="testManualAlert()" style="padding:4px 10px; font-size:10px;">🧪 Test WhatsApp Alert</button>
+        <button class="cog-btn" type="button" onclick="clearAlertHistoryUI()" style="padding:4px 10px; font-size:10px;">Clear Log</button>
+      </div>
+    </div>
+    <div id="alerts-log-container" style="max-height:200px; overflow-y:auto;">
+      <div id="no-alerts-msg" style="color:var(--text-muted); font-family:var(--mono); font-size:11px; text-align:center; padding:15px;">No emergency alerts triggered yet.</div>
+    </div>
+  </section>
+
   <footer>NEURO DETECT v1.0 &nbsp; ESP32 + MPU6050 &nbsp; Real-time Tremor Monitoring</footer>
+</div>
+
+<!-- Emergency Siren & Alert Overlay -->
+<div id="emergency-alert-overlay">
+  <div class="emergency-modal">
+    <div class="emergency-icon-ring">🚨</div>
+    <h2 id="emg-title" class="emg-title">EMERGENCY: INTENSE TREMOR / FALL DETECTED</h2>
+    <p id="emg-desc" class="emg-desc">Sudden high magnitude spike detected. Possible fall or violent tremor.</p>
+    <div class="emg-details">
+      <div class="emg-stat-box">
+        <span class="emg-stat-lbl">PATIENT</span>
+        <span id="emg-patient-name" class="emg-stat-val">--</span>
+      </div>
+      <div class="emg-stat-box">
+        <span class="emg-stat-lbl">MAGNITUDE</span>
+        <span id="emg-mag-val" class="emg-stat-val">--</span>
+      </div>
+      <div class="emg-stat-box">
+        <span class="emg-stat-lbl">TIMESTAMP</span>
+        <span id="emg-time-val" class="emg-stat-val">--</span>
+      </div>
+    </div>
+    <div id="emg-dispatch-status" class="emg-dispatch-status">Alert sent via WhatsApp / Webhook...</div>
+    <div class="emg-actions">
+      <a id="emg-wa-caretaker-btn" href="#" target="_blank" class="cog-btn success">📲 Open Caretaker WhatsApp</a>
+      <a id="emg-wa-patient-btn" href="#" target="_blank" class="cog-btn">📲 Open Patient WhatsApp</a>
+      <button type="button" class="cog-btn" onclick="replayVoiceAlert()">🔁 Replay Voice</button>
+      <button type="button" class="cog-btn danger" onclick="silenceEmergencyAlert()">🔇 Mute & Dismiss Siren</button>
+    </div>
+  </div>
 </div>
 
 <div id="patient-overlay">
   <div class="patient-modal">
     <button class="modal-close" type="button" onclick="closePatientModal()" aria-label="Close">x</button>
     <div class="modal-title">Patient Manager</div>
-    <div class="modal-sub">Register and select patient records</div>
+    <div class="modal-sub">Register and select patient records with caretaker emergency contacts</div>
     <div class="modal-tabs">
       <button class="modal-tab active" type="button" onclick="switchTab('list')">Patients</button>
       <button class="modal-tab" type="button" onclick="switchTab('new')">New Patient</button>
@@ -1353,13 +1783,81 @@ footer {
     </div>
     <div id="tab-new" style="display:none">
       <div class="field-group">
-        <div class="field"><label for="np-name">Name</label><input id="np-name" type="text"/></div>
-        <div class="field"><label for="np-age">Age</label><input id="np-age" type="number" min="1" max="120"/></div>
-        <div class="field"><label for="np-date">First Used</label><input id="np-date" type="date"/></div>
-        <div class="field"><label for="np-serial">Device Serial</label><input id="np-serial" type="text"/></div>
+        <div class="field"><label for="np-name">Patient Full Name *</label><input id="np-name" type="text" placeholder="e.g. Robert Smith"/></div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div class="field"><label for="np-age">Age *</label><input id="np-age" type="number" min="1" max="120" placeholder="e.g. 68"/></div>
+          <div class="field"><label for="np-date">First Used *</label><input id="np-date" type="date"/></div>
+        </div>
+        <div class="field"><label for="np-serial">Device Serial Number *</label><input id="np-serial" type="text" placeholder="e.g. ESP32-ND-01"/></div>
+        
+        <div style="border-top:1px solid var(--border); margin:4px 0;"></div>
+        <div style="font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:1px; text-transform:uppercase;">Emergency Contacts & WhatsApp</div>
+
+        <div class="field">
+          <label for="np-phone">Patient Phone Number (WhatsApp) *</label>
+          <input id="np-phone" type="tel" placeholder="e.g. +919876543210 (with country code)"/>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div class="field"><label for="np-ct-name">Caretaker Name *</label><input id="np-ct-name" type="text" placeholder="e.g. Dr. Emily (Daughter)"/></div>
+          <div class="field"><label for="np-ct-phone">Caretaker Phone (WhatsApp) *</label><input id="np-ct-phone" type="tel" placeholder="e.g. +919876543211"/></div>
+        </div>
+
+        <div style="background:var(--surface2); border:1px solid var(--border2); border-radius:8px; padding:10px; font-family:var(--mono); font-size:10px; color:var(--text-muted); line-height:1.5;">
+          <div style="color:var(--yellow); font-weight:700; margin-bottom:4px;">💡 AUTOMATED WHATSAPP (Twilio):</div>
+          Sending is handled by the server's Twilio account (configured once in <code style="color:#00d4ff;">backend/.env</code>) — no per-patient key needed. Just make sure the phone numbers above are correct.
+          If this is the Twilio Sandbox number, each recipient must send the sandbox's <code style="color:#00d4ff;">join &lt;code&gt;</code> message to it on WhatsApp <b>once</b> before they can receive anything.
+        </div>
       </div>
       <div id="np-error" class="cog-result bad" style="display:none"></div>
-      <button class="cog-btn success" type="button" onclick="saveNewPatient()">SAVE PATIENT</button>
+      <button class="cog-btn success" type="button" onclick="saveNewPatient()" style="width:100%; padding:12px;">SAVE PATIENT</button>
+    </div>
+  </div>
+</div>
+
+<div id="history-overlay">
+  <div class="history-modal">
+    <button class="modal-close" type="button" onclick="closeHistoryModal()" aria-label="Close">x</button>
+    <div class="modal-title">Reading History</div>
+    <div class="modal-sub">Review a patient's tremor readings for any past day</div>
+
+    <div class="history-controls">
+      <div class="field">
+        <label for="hist-patient">Patient</label>
+        <select id="hist-patient" onchange="loadHistory()"></select>
+      </div>
+      <div class="field">
+        <label for="hist-date">Date</label>
+        <input id="hist-date" type="date" onchange="loadHistory()"/>
+      </div>
+      <div class="history-quickbtns">
+        <button class="cog-btn" type="button" onclick="setHistoryDate(0)">Today</button>
+        <button class="cog-btn" type="button" onclick="setHistoryDate(1)">Yesterday</button>
+      </div>
+    </div>
+
+    <div class="ai-panel" id="ai-panel">
+      <div class="ai-head"><span>✨ AI INSIGHTS</span><span id="ai-status"></span></div>
+      <div class="ai-btns">
+        <select id="ai-range" title="Period to analyse">
+          <option value="day">Selected day</option>
+          <option value="7" selected>Last 7 days</option>
+          <option value="14">Last 14 days</option>
+          <option value="30">Last 30 days</option>
+        </select>
+        <button class="cog-btn" type="button" onclick="aiSummarize('caretaker')">Plain-language summary</button>
+        <button class="cog-btn" type="button" onclick="aiSummarize('clinical')">Clinical-style note</button>
+      </div>
+      <div class="ai-ask">
+        <input id="ai-question" type="text" maxlength="400" placeholder="Ask about this patient's history, e.g. &quot;Which time of day is worst?&quot;" onkeydown="if(event.key==='Enter')aiAsk()"/>
+        <button class="cog-btn" type="button" onclick="aiAsk()">Ask</button>
+      </div>
+      <div id="ai-output" class="ai-output" style="display:none"></div>
+      <div class="ai-disclaimer">AI-generated from sensor aggregates. Not a diagnosis; sensor readings are not clinically validated.</div>
+    </div>
+
+    <div id="history-body">
+      <div class="history-empty">Select a patient and date to load readings.</div>
     </div>
   </div>
 </div>
@@ -1629,6 +2127,12 @@ function connectWS() {
   ws.onmessage = (ev) => {
     try {
       const d = JSON.parse(ev.data);
+      if (d.type === "EMERGENCY_ALERT") {
+        if (typeof handleIncomingBroadcastAlert === "function") {
+          handleIncomingBroadcastAlert(d.alert);
+        }
+        return;
+      }
       applyData(d);
     } catch(e) {
       console.warn('[WS] Parse error', e);
@@ -2127,8 +2631,10 @@ updateRiskPanel();
   // ── Render patient list ──
   function renderPatientList() {
     const container = document.getElementById('patient-list-container');
+    if (!container) return;
+
     if (patients.length === 0) {
-      container.innerHTML = `<div style="font-family:var(--mono);font-size:12px;color:var(--text-muted);text-align:center;padding:20px;">No patients registered yet. Add a new patient.</div>`;
+      container.innerHTML = `<div style="font-family:var(--mono);font-size:12px;color:var(--text-muted);text-align:center;padding:24px;">No patients registered yet. Click <strong>"New Patient"</strong> above to register one.</div>`;
       return;
     }
 
@@ -2141,9 +2647,17 @@ updateRiskPanel();
         <div class="pci-info">
           <div class="pci-name">${p.name}</div>
           <div class="pci-meta">Age: ${p.age} &nbsp;·&nbsp; Since: ${p.date} &nbsp;·&nbsp; Sessions: ${p.sessions || 1}</div>
+          <div style="font-family:var(--mono); font-size:10px; color:#a0d8ef; margin-top:4px;">
+            📱 Patient: ${p.patientPhone || 'No phone'}
+          </div>
+          <div style="font-family:var(--mono); font-size:10px; color:var(--yellow); margin-top:2px;">
+            🛡️ Caretaker: ${p.caretakerName || 'None'} (${p.caretakerPhone || 'No phone'})
+          </div>
         </div>
-        <div class="pci-serial">${p.serial}</div>
-        <button class="pci-delete" onclick="deletePatient('${p.id}', event)" title="Delete">✕</button>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+          <div class="pci-serial">${p.serial}</div>
+          <button class="pci-delete" onclick="deletePatient('${p.id}', event)" title="Delete">✕</button>
+        </div>
       `;
       div.addEventListener('click', () => selectPatient(p.id));
       container.appendChild(div);
@@ -2152,15 +2666,18 @@ updateRiskPanel();
 
   // ── Save new patient ──
   window.saveNewPatient = function() {
-    const name   = document.getElementById('np-name').value.trim();
-    const age    = document.getElementById('np-age').value.trim();
-    const date   = document.getElementById('np-date').value;
-    const serial = document.getElementById('np-serial').value.trim();
-    const errEl  = document.getElementById('np-error');
+    const name           = document.getElementById('np-name').value.trim();
+    const age            = document.getElementById('np-age').value.trim();
+    const date           = document.getElementById('np-date').value;
+    const serial         = document.getElementById('np-serial').value.trim();
+    const patientPhone   = document.getElementById('np-phone').value.trim();
+    const caretakerName  = document.getElementById('np-ct-name').value.trim();
+    const caretakerPhone = document.getElementById('np-ct-phone').value.trim();
+    const errEl          = document.getElementById('np-error');
 
     // Validation
-    if (!name || !age || !date || !serial) {
-      errEl.textContent = '⚠ All fields are required.';
+    if (!name || !age || !date || !serial || !patientPhone || !caretakerName || !caretakerPhone) {
+      errEl.textContent = '⚠ All required fields marked with * must be filled.';
       errEl.style.display = 'block';
       return;
     }
@@ -2172,14 +2689,17 @@ updateRiskPanel();
     errEl.style.display = 'none';
 
     const newPatient = {
-      id:       genId(),
-      name:     name,
-      age:      parseInt(age),
-      date:     date,
-      serial:   serial,
-      sessions: 1,
-      createdAt: new Date().toISOString(),
-      history:  []
+      id:             genId(),
+      name:           name,
+      age:            parseInt(age),
+      date:           date,
+      serial:         serial,
+      patientPhone:   patientPhone,
+      caretakerName:  caretakerName,
+      caretakerPhone: caretakerPhone,
+      sessions:       1,
+      createdAt:      new Date().toISOString(),
+      history:        []
     };
 
     loadPatients();
@@ -2187,15 +2707,18 @@ updateRiskPanel();
     savePatients();
 
     // Clear form
-    document.getElementById('np-name').value   = '';
-    document.getElementById('np-age').value    = '';
-    document.getElementById('np-serial').value = '';
+    document.getElementById('np-name').value      = '';
+    document.getElementById('np-age').value       = '';
+    document.getElementById('np-serial').value    = '';
+    document.getElementById('np-phone').value     = '';
+    document.getElementById('np-ct-name').value   = '';
+    document.getElementById('np-ct-phone').value  = '';
 
     // Switch to list and select the new patient
     switchTab('list');
     renderPatientList();
     selectPatient(newPatient.id);
-    logEvent(`New patient registered: ${name} (Serial: ${serial})`, '');
+    logEvent(`New patient registered: ${name} (Caretaker: ${caretakerName}, Phone: ${caretakerPhone})`, '');
   };
 
   // ── Select / activate a patient ──
@@ -2212,7 +2735,7 @@ updateRiskPanel();
     activePatient = p;
     updateActiveBar(p);
     closePatientModal();
-    logEvent(`Patient selected: ${p.name} | Age: ${p.age} | Serial: ${p.serial}`, '');
+    logEvent(`Patient selected: ${p.name} | Phone: ${p.patientPhone || '--'} | Caretaker: ${p.caretakerName || '--'}`, '');
   }
 
   // ── Delete a patient ──
@@ -2237,8 +2760,56 @@ updateRiskPanel();
     document.getElementById('apb-meta').textContent   = `Age: ${p.age}  ·  First used: ${p.date}`;
     document.getElementById('apb-serial').textContent = `Serial: ${p.serial}`;
     document.getElementById('apb-session').textContent = `Session #${p.sessions}`;
+
+    // Patient Phone Tag
+    const pPhoneEl = document.getElementById('apb-patient-phone');
+    const pPhoneWrap = document.getElementById('apb-phone-tag');
+    if (p.patientPhone) {
+      pPhoneEl.textContent = p.patientPhone;
+      pPhoneWrap.style.display = 'inline-flex';
+    } else {
+      pPhoneWrap.style.display = 'none';
+    }
+
+    // Caretaker Box
+    const ctBox = document.getElementById('apb-caretaker-box');
+    const ctName = document.getElementById('apb-caretaker-name');
+    const ctPhone = document.getElementById('apb-caretaker-phone');
+    if (p.caretakerName || p.caretakerPhone) {
+      ctName.textContent = p.caretakerName || 'Caretaker';
+      ctPhone.textContent = '📱 ' + (p.caretakerPhone || 'No phone');
+      ctBox.style.display = 'flex';
+    } else {
+      ctBox.style.display = 'none';
+    }
+
     bar.classList.add('show');
   }
+
+  // ── Helpers to get active patient and open WhatsApp ──
+  window.getActivePatient = function() {
+    return activePatient;
+  };
+
+  window.openCaretakerWA = function() {
+    if (!activePatient || !activePatient.caretakerPhone) {
+      alert("No caretaker phone number registered for the active patient.");
+      return;
+    }
+    const clean = activePatient.caretakerPhone.replace(/[^\d]/g, '');
+    const msg = encodeURIComponent(`Hello ${activePatient.caretakerName || 'Caretaker'}, checking in from Neuro Detect regarding patient ${activePatient.name}.`);
+    window.open(`https://wa.me/${clean}?text=${msg}`, '_blank');
+  };
+
+  window.openPatientWA = function() {
+    if (!activePatient || !activePatient.patientPhone) {
+      alert("No patient phone number registered for the active patient.");
+      return;
+    }
+    const clean = activePatient.patientPhone.replace(/[^\d]/g, '');
+    const msg = encodeURIComponent(`Hello ${activePatient.name}, checking in from Neuro Detect system.`);
+    window.open(`https://wa.me/${clean}?text=${msg}`, '_blank');
+  };
 
   // ── Auto-open modal if no patient selected ──
   loadPatients();
@@ -2365,6 +2936,821 @@ updateRiskPanel();
 
   // Initial render
   updatePDPanel('NONE', 0, []);
+})();
+
+// ═══════════════════════════════════════════════
+//  TREMOR EMERGENCY & WHATSAPP ALERT ENGINE
+// ═══════════════════════════════════════════════
+(function setupTremorAlertEngine() {
+  const COOLDOWN_MS = 5 * 60 * 1000;              // 5 minutes cooldown between repeat alerts
+  const CONTINUOUS_THRESHOLD_MS = 25 * 1000;  // continuous tremor duration before alerting (25 sec)
+  const CALM_RESET_MS = 3 * 1000;                 // brief dips below threshold (<8s) don't reset the timer — needed at this duration so one micro-pause doesn't erase minutes of progress
+
+  let lastAlertTimestamp = 0;
+  let continuousStartTime = null;
+  let continuousAlertSent = false;
+  let lastCalmTimestamp = Date.now();
+  let localAlerts = [];
+
+  // ── Web Audio Synthesizer (Siren & Chime) ──
+  let audioCtx = null;
+  let sirenOsc = null;
+  let sirenGain = null;
+  let sirenInterval = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  function startSiren() {
+    try {
+      initAudio();
+      if (sirenOsc) return;
+
+      sirenOsc = audioCtx.createOscillator();
+      sirenGain = audioCtx.createGain();
+
+      sirenOsc.type = 'sawtooth';
+      sirenOsc.frequency.setValueAtTime(800, audioCtx.currentTime);
+
+      sirenGain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+
+      sirenOsc.connect(sirenGain);
+      sirenGain.connect(audioCtx.destination);
+      sirenOsc.start();
+
+      let high = true;
+      sirenInterval = setInterval(() => {
+        if (!sirenOsc || !audioCtx) return;
+        const targetFreq = high ? 960 : 540;
+        sirenOsc.frequency.exponentialRampToValueAtTime(targetFreq, audioCtx.currentTime + 0.22);
+        high = !high;
+      }, 260);
+    } catch(e) {
+      console.warn('[AUDIO] Siren failed:', e);
+    }
+  }
+
+  function stopSiren() {
+    if (sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; }
+    if (sirenOsc) {
+      try { sirenOsc.stop(); sirenOsc.disconnect(); } catch(e) {}
+      sirenOsc = null;
+    }
+    if (sirenGain) {
+      try { sirenGain.disconnect(); } catch(e) {}
+      sirenGain = null;
+    }
+  }
+
+  function playChime() {
+    try {
+      initAudio();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);       // D5
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.16);     // A5
+      gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.6);
+    } catch(e) {}
+  }
+
+  // ── Voice Note (Web Speech API) ──────────────────────────────────────
+  // Spoken announcement whenever an alert fires (25-sec continuous movement,
+  // fall/spike, manual test). Hooked in at the same point as the siren/chime,
+  // so it plays exactly when the alert overlay opens. No audio files needed.
+  const VOICE_PREF_KEY   = 'neuro_detect_voice_enabled';
+  const VOICE_REPEAT_MS  = 15000;  // repeat while the alert overlay is still open
+  const VOICE_MAX_PLAYS  = 4;      // initial + 3 repeats, then stop
+  const VOICE_DEDUPE_MS  = 20000;  // ignore identical announcement inside this window (WS echo of own alert)
+  let voiceEnabled = true;
+  try { voiceEnabled = localStorage.getItem(VOICE_PREF_KEY) !== '0'; } catch(e) {}
+  let voiceTimer = null, voicePlays = 0, lastVoiceText = '', lastVoiceAt = 0;
+
+  function voiceSupported() { return 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window; }
+
+  function refreshVoiceBtn() {
+    const b = document.getElementById('voice-toggle-btn');
+    if (!b) return;
+    b.textContent = voiceSupported() ? (voiceEnabled ? '🔊 Voice: ON' : '🔇 Voice: OFF') : '🔇 Voice: N/A';
+    b.disabled = !voiceSupported();
+  }
+
+  function durationWords(ms) {
+    const secs = Math.round(ms / 1000);
+    if (secs < 60) return `${secs} seconds`;
+    const mins = Math.round(secs / 60);
+    return mins === 1 ? 'one minute' : `${mins} minutes`;
+  }
+
+  function buildVoiceText(alertType, name) {
+    const who = name || 'the patient';
+    if (alertType === 'FALL_INTENSE_SPIKE')
+      return `Emergency. A sudden intense tremor or possible fall was detected for ${who}. Please check on the patient immediately.`;
+    if (alertType === 'CONTINUOUS_HIGH_TREMOR')
+      return `Attention. ${who}'s hand has been moving continuously for ${durationWords(CONTINUOUS_THRESHOLD_MS)}. Please check on the patient.`;
+    return 'This is a test of the Neuro Detect voice alert.';
+  }
+
+  function pickVoice() {
+    const vs = window.speechSynthesis.getVoices() || [];
+    return vs.find(v => /^en[-_]IN/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
+  }
+
+  function speakNow(text) {
+    if (!voiceSupported()) return false;
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      const v = pickVoice();
+      if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = 'en-IN'; }
+      u.rate = 0.95; u.pitch = 1; u.volume = 1;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+      return true;
+    } catch(e) { console.warn('[VOICE] speak failed:', e); return false; }
+  }
+
+  function cancelVoice() {
+    if (voiceTimer) { clearTimeout(voiceTimer); voiceTimer = null; }
+    voicePlays = 0;
+    try { if (voiceSupported()) window.speechSynthesis.cancel(); } catch(e) {}
+  }
+
+  function overlayOpen() {
+    const el = document.getElementById('emergency-alert-overlay');
+    return !!(el && el.classList.contains('open'));
+  }
+
+  function scheduleVoiceRepeat(text, repeat) {
+    if (!repeat) return;
+    voiceTimer = setTimeout(() => {
+      if (!voiceEnabled || !overlayOpen() || voicePlays >= VOICE_MAX_PLAYS) { voiceTimer = null; return; }
+      voicePlays++;
+      speakNow(text);
+      scheduleVoiceRepeat(text, true);
+    }, VOICE_REPEAT_MS);
+  }
+
+  // Called from triggerAlert (this dashboard) and handleIncomingBroadcastAlert (other dashboards).
+  function announceVoice(alertType, patientName) {
+    if (!voiceEnabled || !voiceSupported()) return;
+    const text = buildVoiceText(alertType, patientName);
+    const now = Date.now();
+    if (text === lastVoiceText && (now - lastVoiceAt) < VOICE_DEDUPE_MS) return;
+    lastVoiceText = text; lastVoiceAt = now;
+    cancelVoice();
+    voicePlays = 1;
+    // small delay so the chime (0.6s) finishes before the voice starts; siren alerts speak immediately
+    setTimeout(() => speakNow(text), alertType === 'FALL_INTENSE_SPIKE' ? 0 : 650);
+    scheduleVoiceRepeat(text, alertType !== 'MANUAL_TEST');
+  }
+
+  // Browsers only allow audio/speech after a user gesture — prime both on the first click/key/tap.
+  function primeAudio() {
+    try {
+      initAudio();
+      if (voiceSupported()) {
+        const u = new SpeechSynthesisUtterance(' ');
+        u.volume = 0;
+        window.speechSynthesis.speak(u);
+        window.speechSynthesis.getVoices();
+      }
+    } catch(e) {}
+  }
+  ['pointerdown', 'keydown', 'touchstart'].forEach(ev =>
+    document.addEventListener(ev, primeAudio, { once: true, passive: true }));
+  if (voiceSupported()) window.speechSynthesis.onvoiceschanged = () => {};
+
+  window.toggleVoiceAlerts = function() {
+    voiceEnabled = !voiceEnabled;
+    try { localStorage.setItem(VOICE_PREF_KEY, voiceEnabled ? '1' : '0'); } catch(e) {}
+    if (!voiceEnabled) cancelVoice();
+    refreshVoiceBtn();
+    if (voiceEnabled) speakNow('Voice alerts on.');
+  };
+
+  window.replayVoiceAlert = function() {
+    if (!lastVoiceText) return;
+    voicePlays = 1;
+    speakNow(lastVoiceText);
+  };
+
+  refreshVoiceBtn();
+
+  // ── Cooldown Timer Updater ──
+  setInterval(() => {
+    const elapsed = Date.now() - lastAlertTimestamp;
+    const cdBadge = document.getElementById('apb-cooldown');
+    const cdTimer = document.getElementById('apb-cooldown-timer');
+
+    if (lastAlertTimestamp > 0 && elapsed < COOLDOWN_MS) {
+      const remainingSec = Math.ceil((COOLDOWN_MS - elapsed) / 1000);
+      const mm = String(Math.floor(remainingSec / 60)).padStart(2, '0');
+      const ss = String(remainingSec % 60).padStart(2, '0');
+      cdTimer.textContent = `${mm}:${ss}`;
+      cdBadge.classList.add('active');
+    } else {
+      cdBadge.classList.remove('active');
+    }
+  }, 1000);
+
+  // ── Trigger Emergency Alert ──
+  async function triggerAlert(alertType, data) {
+    const now = Date.now();
+    if (alertType !== 'MANUAL_TEST' && (now - lastAlertTimestamp) < COOLDOWN_MS) {
+      console.log(`[ALERT] In cooldown. ${Math.ceil((COOLDOWN_MS - (now - lastAlertTimestamp))/1000)}s remaining.`);
+      return;
+    }
+
+    const patient = window.getActivePatient ? window.getActivePatient() : null;
+    if (!patient) {
+      logEvent('⚠️ Alert trigger cancelled: No active patient selected', 'tremor-on');
+      return;
+    }
+
+    lastAlertTimestamp = now;
+    const timeStr = new Date().toLocaleTimeString();
+    const isFall = alertType === 'FALL_INTENSE_SPIKE';
+    const isContinuous = alertType === 'CONTINUOUS_HIGH_TREMOR';
+
+    let title = isFall
+      ? 'EMERGENCY: INTENSE TREMOR / POTENTIAL FALL'
+      : isContinuous
+        ? 'NOTICE: CONTINUOUS HIGH TREMOR (HAND MOVING)'
+        : 'TEST ALERT: NEURO DETECT SYSTEM';
+
+    let messageText = '';
+    const recipients = [];
+
+    // Caretaker is always notified
+    if (patient.caretakerPhone) {
+      recipients.push({
+        role: 'caretaker',
+        name: patient.caretakerName || 'Caretaker',
+        phone: patient.caretakerPhone
+      });
+    }
+
+    if (isFall) {
+      // Patient also receives SMS/WhatsApp on sudden fall / severe spike
+      if (patient.patientPhone) {
+        recipients.push({
+          role: 'patient',
+          name: patient.name,
+          phone: patient.patientPhone
+        });
+      }
+
+      messageText = `🚨 *EMERGENCY ALERT - NEURO DETECT*\n\n` +
+        `Patient: *${patient.name}* (Device: ${patient.serial})\n` +
+        `CRITICAL: Sudden intense tremor spike or potential fall detected!\n` +
+        `Magnitude: ${(data.gyroMag || 0).toFixed(3)} rad/s | Motion: ${(data.motionLevel || 0).toFixed(3)}\n` +
+        `Intensity: ${data.intensity || 'SEVERE'}\n` +
+        `Time: ${timeStr}\n` +
+        `Please check on the patient immediately!`;
+
+      startSiren();
+    } else if (isContinuous) {
+      // Continuous tremor goes to caretaker
+      messageText = `⚠️ *NEURO DETECT NOTICE - CONTINUOUS TREMORS*\n\n` +
+        `Patient: *${patient.name}* (Device: ${patient.serial})\n` +
+        `Status: Experiencing continuous high tremors for over ${Math.round(CONTINUOUS_THRESHOLD_MS/1000)} seconds.\n` +
+        `Observation: The patient is NOT being still and their hand is moving continuously.\n` +
+        `Intensity: ${data.intensity || 'MODERATE'} | Gyro: ${(data.gyroMag || 0).toFixed(3)} rad/s\n` +
+        `Time: ${timeStr}\n` +
+        `Please assist the patient.`;
+
+      playChime();
+    } else {
+      // Test message
+      messageText = `🧪 *NEURO DETECT - TEST ALERT*\n\n` +
+        `Patient: *${patient.name}*\n` +
+        `System test notification for Caretaker: ${patient.caretakerName}.\n` +
+        `WhatsApp alerts are functioning correctly.\n` +
+        `Time: ${timeStr}`;
+      playChime();
+    }
+
+    // Populate Modal UI
+    document.getElementById('emg-title').textContent = title;
+    document.getElementById('emg-desc').textContent = isFall
+      ? 'Sudden violent tremor or potential fall detected on sensor! Emergency contacts alerted.'
+      : isContinuous
+        ? `High tremors detected continuously for ${durationWords(CONTINUOUS_THRESHOLD_MS)}. Patient hand is moving.`
+        : 'Test notification triggered to verify WhatsApp communication.';
+
+    document.getElementById('emg-patient-name').textContent = patient.name;
+    document.getElementById('emg-mag-val').textContent = (data.gyroMag ? data.gyroMag.toFixed(3) : '0.000') + ' rad/s';
+    document.getElementById('emg-time-val').textContent = timeStr;
+    document.getElementById('emg-dispatch-status').textContent = '📡 Sending WhatsApp alert to contacts...';
+
+    // Show Emergency Overlay
+    document.getElementById('emergency-alert-overlay').classList.add('open');
+
+    // Voice note — same trigger point as the siren/chime and the WhatsApp dispatch below
+    announceVoice(alertType, patient.name);
+
+    // Dispatch via backend
+    try {
+      const res = await fetch('/api/send-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientId: patient.id,
+          patientName: patient.name,
+          alertType: alertType,
+          message: messageText,
+          recipients: recipients
+        })
+      });
+
+      const resData = await res.json();
+      if (resData.success && resData.alertRecord) {
+        handleAlertSentSuccess(resData.alertRecord);
+      }
+    } catch(err) {
+      console.warn('[ALERT] Backend dispatch error, setting up direct fallback:', err);
+      // Fallback direct wa.me links
+      setupDirectWAFallback(recipients, messageText, alertType);
+    }
+  }
+
+  function handleAlertSentSuccess(record) {
+    if (!localAlerts.some(a => a.id === record.id)) localAlerts.unshift(record);
+    renderAlertLogUI();
+
+    const caretakerRec = record.recipients.find(r => r.role === 'caretaker');
+    const patientRec = record.recipients.find(r => r.role === 'patient');
+
+    const ctBtn = document.getElementById('emg-wa-caretaker-btn');
+    if (caretakerRec && caretakerRec.waWebUrl) {
+      ctBtn.href = caretakerRec.waWebUrl;
+      ctBtn.style.display = 'inline-block';
+    } else {
+      ctBtn.style.display = 'none';
+    }
+
+    const ptBtn = document.getElementById('emg-wa-patient-btn');
+    if (patientRec && patientRec.waWebUrl) {
+      ptBtn.href = patientRec.waWebUrl;
+      ptBtn.style.display = 'inline-block';
+    } else {
+      ptBtn.style.display = 'none';
+    }
+
+    const sentRec = record.recipients.find(r => r.apiSent);
+    const apiSent = !!sentRec;
+    const statusEl = document.getElementById('emg-dispatch-status');
+    if (apiSent) {
+      const channel = sentRec.apiDetails?.channel === 'twilio' ? 'Twilio' : 'CallMeBot';
+      statusEl.textContent = `✅ WhatsApp message sent directly to phone via ${channel}!`;
+      statusEl.style.color = 'var(--green)';
+    } else {
+      statusEl.textContent = '📲 Click button below to open WhatsApp Web and send message instantly.';
+      statusEl.style.color = 'var(--yellow)';
+    }
+
+    logEvent(`🚨 Alert Sent: ${record.alertType} for ${record.patientName}`, 'tremor-on');
+  }
+
+  function setupDirectWAFallback(recipients, msg, alertType) {
+    const encoded = encodeURIComponent(msg);
+    const ct = recipients.find(r => r.role === 'caretaker');
+    const pt = recipients.find(r => r.role === 'patient');
+
+    const ctBtn = document.getElementById('emg-wa-caretaker-btn');
+    if (ct && ct.phone) {
+      const clean = ct.phone.replace(/[^\d]/g, '');
+      ctBtn.href = `https://wa.me/${clean}?text=${encoded}`;
+      ctBtn.style.display = 'inline-block';
+    }
+
+    const ptBtn = document.getElementById('emg-wa-patient-btn');
+    if (pt && pt.phone) {
+      const clean = pt.phone.replace(/[^\d]/g, '');
+      ptBtn.href = `https://wa.me/${clean}?text=${encoded}`;
+      ptBtn.style.display = 'inline-block';
+    }
+
+    document.getElementById('emg-dispatch-status').textContent = '📲 Click below to send WhatsApp notification';
+  }
+
+  // ── Render Alert Log in UI ──
+  function renderAlertLogUI() {
+    const container = document.getElementById('alerts-log-container');
+    if (!container) return;
+
+    if (localAlerts.length === 0) {
+      container.innerHTML = `<div id="no-alerts-msg" style="color:var(--text-muted); font-family:var(--mono); font-size:11px; text-align:center; padding:15px;">No emergency alerts triggered yet.</div>`;
+      return;
+    }
+
+    container.innerHTML = '';
+    localAlerts.forEach(alt => {
+      const row = document.createElement('div');
+      row.className = 'alert-log-row';
+
+      const isFall = alt.alertType === 'FALL_INTENSE_SPIKE';
+      const isCont = alt.alertType === 'CONTINUOUS_HIGH_TREMOR';
+      const badgeCls = isFall ? 'fall' : isCont ? 'continuous' : 'test';
+      const badgeLabel = isFall ? 'FALL / SPIKE' : isCont ? `${Math.round(CONTINUOUS_THRESHOLD_MS/1000)}s CONTINUOUS` : 'TEST';
+
+      let linksHtml = '';
+      if (alt.recipients && alt.recipients.length > 0) {
+        linksHtml = alt.recipients.map(r => {
+          const apiTag = r.apiSent ? ' <span style="color:var(--green)">[API Sent]</span>' : '';
+          return `<a href="${r.waWebUrl || '#'}" target="_blank" class="alert-wa-link">📲 ${r.role} (${r.phone})${apiTag}</a>`;
+        }).join(' &nbsp;·&nbsp; ');
+      }
+
+      row.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="alert-type-badge ${badgeCls}">${badgeLabel}</span>
+          <span style="color:#fff; font-weight:700;">${alt.patientName}</span>
+          <span style="color:var(--text-muted);">[${alt.timeFormatted || new Date(alt.timestamp).toLocaleTimeString()}]</span>
+        </div>
+        <div>${linksHtml}</div>
+      `;
+      container.appendChild(row);
+    });
+  }
+
+  // ── Mute / Dismiss Siren & Overlay ──
+  window.silenceEmergencyAlert = function() {
+    stopSiren();
+    cancelVoice();
+    document.getElementById('emergency-alert-overlay').classList.remove('open');
+    logEvent('Emergency alert silenced and dismissed by user.', '');
+  };
+
+  // ── Manual Test Alert ──
+  window.testManualAlert = function() {
+    const p = window.getActivePatient ? window.getActivePatient() : null;
+    if (!p) {
+      alert("Please select or register a patient first in the Patients manager!");
+      window.openPatientModal();
+      return;
+    }
+    triggerAlert('MANUAL_TEST', { gyroMag: 0.05, motionLevel: 0.05, intensity: 'TEST' });
+  };
+
+  window.clearAlertHistoryUI = function() {
+    localAlerts = [];
+    renderAlertLogUI();
+  };
+
+  // ── Broadcast handler from other clients via WebSocket ──
+  window.handleIncomingBroadcastAlert = function(alertRecord) {
+    if (!localAlerts.some(a => a.id === alertRecord.id)) localAlerts.unshift(alertRecord);
+    renderAlertLogUI();
+    if (alertRecord.alertType === 'FALL_INTENSE_SPIKE') {
+      startSiren();
+    } else {
+      playChime();
+    }
+    document.getElementById('emergency-alert-overlay').classList.add('open');
+    announceVoice(alertRecord.alertType, alertRecord.patientName);  // deduped if this tab already spoke
+  };
+
+  // ── Fetch existing alert history from backend on boot ──
+  async function fetchExistingAlerts() {
+    try {
+      const res = await fetch('/api/alerts');
+      const data = await res.json();
+      if (data.alerts && Array.isArray(data.alerts)) {
+        localAlerts = data.alerts;
+        renderAlertLogUI();
+      }
+    } catch(e) {}
+  }
+  fetchExistingAlerts();
+
+  // ── Hook into Sensor Stream (applyData) ──
+  const prevApply = window.applyData;
+  window.applyData = function(d) {
+    prevApply(d);
+
+    const gyroMag = d.gyroMag || 0;
+    const motion = d.motionLevel || 0;
+    const intensity = d.intensity || 'NONE';
+
+    // 1) Scenario A: Sudden High Intensity / Fall Event — DISABLED FOR NOW (2026-09-26)
+    // Turned off per request: a single-second spike shouldn't alert on its own.
+    // To bring this back later, uncomment below (consider pairing it with a short
+    // sustained-window check first, since a single instant reading is noise-prone):
+    //
+    // if (gyroMag >= 2.2 || motion >= 2.5 || (intensity === 'SEVERE' && gyroMag >= 1.7)) {
+    //   triggerAlert('FALL_INTENSE_SPIKE', d);
+    // }
+
+    // 2) Scenario B: Continuous High Tremor (Hand moving / not still, sustained — see CONTINUOUS_THRESHOLD_MS)
+    // Moderate/Severe tremor condition:
+    const isHighTremor = (intensity === 'MODERATE' || intensity === 'SEVERE' || gyroMag >= 1.25);
+    const meterEl = document.getElementById('continuous-tremor-meter');
+    const meterFill = document.getElementById('ctm-fill');
+    const meterLbl = document.getElementById('ctm-timer-label');
+
+    if (isHighTremor) {
+      lastCalmTimestamp = Date.now();
+      if (continuousStartTime === null) {
+        continuousStartTime = Date.now();
+        continuousAlertSent = false;
+      }
+
+      const elapsed = Date.now() - continuousStartTime;
+      const progressPct = Math.min(100, (elapsed / CONTINUOUS_THRESHOLD_MS) * 100);
+
+      meterEl.classList.add('active');
+      meterFill.style.width = progressPct.toFixed(1) + '%';
+      const fmtMin = (ms) => `${Math.floor(ms/60000)}:${String(Math.floor((ms%60000)/1000)).padStart(2,'0')}`;
+      meterLbl.textContent = `${fmtMin(elapsed)} / ${fmtMin(CONTINUOUS_THRESHOLD_MS)}`;
+
+      if (elapsed >= CONTINUOUS_THRESHOLD_MS && !continuousAlertSent) {
+        continuousAlertSent = true;
+        triggerAlert('CONTINUOUS_HIGH_TREMOR', d);
+      }
+    } else {
+      // Brief dip below threshold doesn't reset the timer (see CALM_RESET_MS)
+      if (Date.now() - lastCalmTimestamp > CALM_RESET_MS) {
+        continuousStartTime = null;
+        continuousAlertSent = false;
+        if (meterEl) meterEl.classList.remove('active');
+        if (meterFill) meterFill.style.width = '0%';
+      }
+    }
+  };
+
+})();
+
+// ═══════════════════════════════════════════════
+//  READING HISTORY (SQLite-backed, see backend/db.js)
+// ═══════════════════════════════════════════════
+(function setupHistory() {
+
+  const INTENSITY_ORDER = ['NONE', 'MINIMAL', 'MILD', 'MODERATE', 'SEVERE'];
+  const INTENSITY_COLORS = {
+    NONE:     '#00e676',
+    MINIMAL:  '#ffca28',
+    MILD:     '#ff9800',
+    MODERATE: '#ff7043',
+    SEVERE:   '#ff1744',
+  };
+  const PATIENTS_KEY = 'neuro_detect_patients';
+  const LOG_INTERVAL_MS = 5000; // how often a reading is saved to history while a patient is active
+
+  function fmtDate(d) {
+    const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  function fmtTimeShort(ts) {
+    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  function readPatients() {
+    try { return JSON.parse(localStorage.getItem(PATIENTS_KEY)) || []; }
+    catch(e) { return []; }
+  }
+
+  // ── Modal open/close ──
+  window.openHistoryModal = function() {
+    const select = document.getElementById('hist-patient');
+    const patients = readPatients();
+    const active = window.getActivePatient ? window.getActivePatient() : null;
+
+    if (patients.length === 0) {
+      select.innerHTML = '<option value="">No patients registered</option>';
+    } else {
+      select.innerHTML = patients.map(p =>
+        `<option value="${p.id}" ${active && active.id === p.id ? 'selected' : ''}>${p.name}</option>`
+      ).join('');
+    }
+
+    const dateInput = document.getElementById('hist-date');
+    if (!dateInput.value) dateInput.value = fmtDate(new Date());
+
+    document.getElementById('history-overlay').classList.add('open');
+    if (patients.length > 0) loadHistory();
+  };
+
+  window.closeHistoryModal = function() {
+    document.getElementById('history-overlay').classList.remove('open');
+  };
+
+  document.getElementById('history-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeHistoryModal();
+  });
+
+  window.setHistoryDate = function(daysAgo) {
+    const d = new Date();
+    d.setDate(d.getDate() - daysAgo);
+    document.getElementById('hist-date').value = fmtDate(d);
+    loadHistory();
+  };
+
+  // ── Load + render one day's history ──
+  let lastLoadedReadings = [];
+
+  window.loadHistory = async function() {
+    const patientId = document.getElementById('hist-patient').value;
+    const date       = document.getElementById('hist-date').value;
+    const body       = document.getElementById('history-body');
+
+    if (!patientId || !date) return;
+
+    body.innerHTML = '<div class="history-empty">Loading…</div>';
+
+    try {
+      const res  = await fetch(`/api/history/day?patientId=${encodeURIComponent(patientId)}&date=${date}`);
+      const data = await res.json();
+      lastLoadedReadings = data.readings || [];
+      renderHistory(data);
+    } catch (e) {
+      body.innerHTML = '<div class="history-empty">⚠ Could not reach backend — is server.js running?</div>';
+    }
+  };
+
+  function renderHistory(data) {
+    const body = document.getElementById('history-body');
+    const { summary, readings } = data;
+
+    if (!readings || readings.length === 0) {
+      body.innerHTML = `<div class="history-empty">No readings logged for this date.<br><span style="opacity:.7">Readings are saved automatically every ${LOG_INTERVAL_MS/1000}s while a patient is selected and the dashboard/server is running.</span></div>`;
+      return;
+    }
+
+    // Summary cards
+    const cardsHtml = INTENSITY_ORDER.map(level => `
+      <div class="hs-card" style="border-color:${INTENSITY_COLORS[level]}66;">
+        <div class="hs-count" style="color:${INTENSITY_COLORS[level]}">${summary.counts[level]}</div>
+        <div class="hs-label">${level}</div>
+      </div>
+    `).join('');
+
+    // Meta row
+    const metaHtml = `
+      <div class="history-meta-row">
+        <div>Total readings: <b>${summary.total}</b></div>
+        <div>Tremor detected: <b>${summary.tremorPct}%</b> of the day</div>
+        <div>Peak magnitude: <b>${summary.maxGyroMag} rad/s</b></div>
+        <div>Avg magnitude: <b>${summary.avgGyroMag} rad/s</b></div>
+        <div>Span: <b>${fmtTimeShort(summary.firstTs)} – ${fmtTimeShort(summary.lastTs)}</b></div>
+      </div>
+    `;
+
+    // Hourly heatmap — worst intensity seen in each hour of the day
+    const hourWorst = Array(24).fill(null);
+    readings.forEach(r => {
+      const hour = new Date(r.ts).getHours();
+      const rank = INTENSITY_ORDER.indexOf(r.intensity);
+      if (hourWorst[hour] === null || rank > INTENSITY_ORDER.indexOf(hourWorst[hour])) {
+        hourWorst[hour] = r.intensity;
+      }
+    });
+    const heatmapHtml = hourWorst.map((level, h) => {
+      const color = level ? INTENSITY_COLORS[level] : null;
+      const style = color ? `background:${color}33; border-color:${color};` : '';
+      const title = level ? `${String(h).padStart(2,'0')}:00 — worst: ${level}` : `${String(h).padStart(2,'0')}:00 — no data`;
+      return `<div class="hh-block" style="${style}" title="${title}"></div>`;
+    }).join('');
+    const hourLabelsHtml = [0,6,12,18].map(h => `<span style="grid-column:span 6; text-align:left;">${String(h).padStart(2,'0')}:00</span>`).join('');
+
+    body.innerHTML = `
+      <div class="history-summary-grid">${cardsHtml}</div>
+      ${metaHtml}
+      <div class="hh-strip">${heatmapHtml}</div>
+      <div class="hh-block-label" style="display:grid; grid-template-columns:repeat(24,1fr);">${hourLabelsHtml}</div>
+      <div class="history-filter-row" style="margin-top:16px;">
+        <span>Reading Log</span>
+        <select id="hist-filter" onchange="renderHistoryTable()">
+          <option value="mild-up" selected>Mild & above</option>
+          <option value="all">All readings</option>
+          <option value="moderate-up">Moderate & above</option>
+        </select>
+      </div>
+      <div class="history-table-wrap">
+        <table class="history-table">
+          <thead><tr><th>Time</th><th>Intensity</th><th>Gyro Mag (rad/s)</th><th>Motion</th></tr></thead>
+          <tbody id="hist-table-body"></tbody>
+        </table>
+      </div>
+    `;
+
+    renderHistoryTable();
+  }
+
+  window.renderHistoryTable = function() {
+    const filter = document.getElementById('hist-filter')?.value || 'mild-up';
+    const minRank = filter === 'all' ? 0 : filter === 'moderate-up' ? INTENSITY_ORDER.indexOf('MODERATE') : INTENSITY_ORDER.indexOf('MILD');
+
+    const filtered = lastLoadedReadings.filter(r => INTENSITY_ORDER.indexOf(r.intensity) >= minRank);
+    const capped = filtered.slice(-300); // most recent 300 matching rows
+
+    const tbody = document.getElementById('hist-table-body');
+    if (!tbody) return;
+
+    if (capped.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:20px;">No readings match this filter.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = capped.slice().reverse().map(r => `
+      <tr>
+        <td>${r.time}</td>
+        <td><span class="hi-badge" style="color:${INTENSITY_COLORS[r.intensity]}">${r.intensity}</span></td>
+        <td>${(r.gyroMag || 0).toFixed(3)}</td>
+        <td>${(r.motionLevel || 0).toFixed(3)}</td>
+      </tr>
+    `).join('') + (filtered.length > 300
+      ? `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); font-style:italic;">Showing most recent 300 of ${filtered.length} matching readings</td></tr>`
+      : '');
+  };
+
+  // ── AI insights (backend /api/ai/*, see backend/llm.js) ──
+  function aiShow(text, isErr) {
+    const out = document.getElementById('ai-output');
+    out.style.display = 'block';
+    out.className = 'ai-output' + (isErr ? ' err' : '');
+    out.textContent = text;   // textContent, never innerHTML: model output is untrusted
+  }
+  function aiBusy(on) {
+    document.getElementById('ai-status').textContent = on ? 'thinking…' : '';
+    document.querySelectorAll('#ai-panel button').forEach(b => b.disabled = on);
+  }
+  function aiRange() {
+    const sel  = document.getElementById('ai-range').value;
+    const date = document.getElementById('hist-date').value || fmtDate(new Date());
+    if (sel === 'day') return { from: date, to: date };
+    const end = new Date(date + 'T00:00:00');
+    const start = new Date(end); start.setDate(start.getDate() - (parseInt(sel, 10) - 1));
+    return { from: fmtDate(start), to: fmtDate(end) };
+  }
+  async function aiCall(path, payload) {
+    const patientId = document.getElementById('hist-patient').value;
+    if (!patientId) { aiShow('Select a patient first.', true); return; }
+    aiBusy(true);
+    aiShow('Working on it…', false);
+    try {
+      const res  = await fetch(path, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ patientId, ...payload })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { aiShow(data.error || `Request failed (${res.status})`, true); return; }
+      aiShow(data.text || '(empty response)', false);
+    } catch (e) {
+      aiShow('Could not reach the backend — is server.js running?', true);
+    } finally { aiBusy(false); }
+  }
+  window.aiSummarize = function(audience) {
+    const r = aiRange();
+    const p = readPatients().find(x => x.id === document.getElementById('hist-patient').value);
+    aiCall('/api/ai/summary', { audience, from: r.from, to: r.to, patientName: p ? p.name : '' });
+  };
+  window.aiAsk = function() {
+    const q = document.getElementById('ai-question').value.trim();
+    if (!q) return;
+    const r = aiRange();
+    const p = readPatients().find(x => x.id === document.getElementById('hist-patient').value);
+    aiCall('/api/ai/ask', { question: q, from: r.from, to: r.to, patientName: p ? p.name : '' });
+  };
+
+  // ── Log the current reading to the history database periodically ──
+  let lastLogAt = 0;
+  const prevApplyForHistory = window.applyData;
+  window.applyData = function(d) {
+    prevApplyForHistory(d);
+
+    if (!d.esp32Online) return;
+    const patient = window.getActivePatient ? window.getActivePatient() : null;
+    if (!patient) return;
+
+    const now = Date.now();
+    if (now - lastLogAt < LOG_INTERVAL_MS) return;
+    lastLogAt = now;
+
+    fetch('/api/history/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        patientId: patient.id,
+        patientName: patient.name,
+        intensity: d.intensity || 'NONE',
+        tremor: !!d.tremor,
+        gyroMag: d.gyroMag || 0,
+        motionLevel: d.motionLevel || 0,
+      }),
+    }).catch(() => { /* offline/backend down — silently skip, next tick will retry */ });
+  };
+
 })();
 </script>
 </body>
